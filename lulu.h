@@ -92,7 +92,7 @@ struct _Rule {
  */
 struct _Program {
     uint8_t nr_rules;
-    Rule_t rules[];
+    Rule_t *rules;
 };
 
 /**
@@ -109,6 +109,13 @@ struct _Agent {
 };
 
 /**
+ * @brief Pswarm class that holds all the components of an Pswarm (colony of colonies)
+ */
+struct _Pswarm {
+    multiset_env_t global_env; // store the objects from the global (swarm) environemnt
+};
+
+/**
  * @brief Pcolony struct that holds all the components of a P colony.
  */
 struct _Pcolony {
@@ -119,16 +126,9 @@ struct _Pcolony {
     //we could have used multiset_env_item_t env[] but in struct we are only alowed ONE variable lenght array
     multiset_env_t env; // store array of objects found in the environment (stored as a multiset using a pair id - nr_objects)
     Agent_t *agents; // agent array
-    Pswarm_t *pswarm; //reference to Pswarm
+    Pswarm_t pswarm; //reference to Pswarm
     //for clarity we use variable lenght array for the alphabet
-    uint8_t A[]; // alphabet (array of objects)
-};
-
-/**
- * @brief Pswarm class that holds all the components of an Pswarm (colony of colonies)
- */
-struct _Pswarm {
-    multiset_env_t global_env; // store the objects from the global (swarm) environemnt
+    uint8_t *A; // alphabet (array of objects)
 };
 
 /******************************************************************************************************************************/
@@ -320,5 +320,55 @@ rule_type_t getSecondRuleTypeFromConditional(rule_type_t rule);
  * @param default_value The default value that will be assigned to each member of the array
  */
 void initArray(uint8_t *array, uint8_t array_size, uint8_t default_value);
+
+/**
+ * @brief Initialize a P colony object
+ *
+ * @param pcol The p colony that will be initialized
+ * @param nr_A The size of the alphabet (nr of objects)
+ * @param nr_agents The number of agents
+ * @param n The capacity of the P colony (nr of objects contained in each agent)
+ */
+void initPcolony(Pcolony_t *pcol, uint8_t nr_A, uint8_t nr_agents, uint8_t n);
+
+/**
+ * @brief Destroy a P colony object and deallocate all ocupied space
+ * This method also destroys all of the contained agents
+ *
+ * @param pcol The P colony that will be destroyed
+ */
+void destroyPcolony(Pcolony_t *pcol);
+
+/**
+ * @brief Initialize an Agent object
+ *
+ * @param agent The agent that will be initialized
+ * @param pcol Reference to the parent P colony
+ * @param nr_programs The number of programs that make up this agent
+ */
+void initAgent(Agent_t *agent, Pcolony_t *pcol, uint8_t nr_programs);
+
+/**
+ * @brief Destroy an Agent object and deallocate all ocupied space
+ * This method also destroys all of the contained programs
+ *
+ * @param agent The agent that will be destroyed
+ */
+void destroyAgent(Agent_t *agent);
+
+/**
+ * @brief Initialize a Program object
+ *
+ * @param program The program that will be initialized
+ * @param nr_rules The number of rules that compose this program (equal to the capacity of the P colony)
+ */
+void initProgram(Program_t *program, uint8_t nr_rules);
+
+/**
+ * @brief Destroy a Program object and deallocate all ocupied space
+ *
+ * @param program The program that will be destroyed
+ */
+void destroyProgram(Program_t *program);
 
 #endif

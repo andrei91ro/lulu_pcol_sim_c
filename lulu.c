@@ -14,7 +14,7 @@
 void initMultisetEnv(multiset_env_t *multiset, uint8_t size) {
     multiset->items = (multiset_env_item_t *)malloc(sizeof(multiset_env_item_t) * size);
     for (uint8_t i = 0; i < size; i++) {
-        multiset->items[i].id = 0;
+        multiset->items[i].id = NO_OBJECT;
         multiset->items[i].nr = 0;
     }
     multiset->size = size;
@@ -208,7 +208,7 @@ bool agent_choseProgram(Agent_t *agent) {
                 //exteroceptive rules require the right hand side obj to be available in the global Pswarm environment
                 //if (rule.main_type == RuleType.exteroceptive and rule.rhs not in self.colony.parentSwarm.global_env):
                 if (rule->type == RULE_TYPE_EXTEROCEPTIVE &&
-                        !areObjectsInMultisetEnv(&agent->pcolony->pswarm->global_env, rule->rhs, NO_OBJECT))
+                        !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT))
                     executable = FALSE;
                     break; //stop checking
 
@@ -241,7 +241,7 @@ bool agent_choseProgram(Agent_t *agent) {
                 //if ( (rule->type == RuleType.communication and rule.rhs not in self.colony.env)
                 //  or (rule.type == RuleType.exteroceptive and rule.rhs not in self.colony.parentSwarm.global_env)
                 if ( (rule->type == RULE_TYPE_COMMUNICATION && !areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT))
-                  || (rule->type == RULE_TYPE_EXTEROCEPTIVE && !areObjectsInMultisetEnv(&agent->pcolony->pswarm->global_env, rule->rhs, NO_OBJECT)) ) {
+                  || (rule->type == RULE_TYPE_EXTEROCEPTIVE && !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) ) {
                     // the first rule cannot be executed so we check the second rule
 
                     // if the second rule is of communication type then the right hand side object has to be in the environement
@@ -253,7 +253,7 @@ bool agent_choseProgram(Agent_t *agent) {
 
                     // if the second rule is of exteroceptive type then the right hand side object has to be in the global Pswarm environement
                     //if (rule.alt_type == RuleType.exteroceptive and rule.alt_rhs not in self.colony.parentSwarm.global_env)
-                    if (getSecondRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE && !areObjectsInMultisetEnv(&agent->pcolony->pswarm->global_env, rule->alt_rhs, NO_OBJECT)) {
+                    if (getSecondRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE && !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->alt_rhs, NO_OBJECT)) {
                         executable = FALSE;
                         break;
                     }
@@ -332,7 +332,7 @@ bool agent_choseProgram(Agent_t *agent) {
             // check that the Pswarm global_env requirements of the program are met
             //for k, v in required_global_env.items():
                 //if (self.colony.parentSwarm.global_env[k] < v):
-            if (!isMultisetEnvIncluded(&agent->pcolony->pswarm->global_env, &required_global_env)) {
+            if (!isMultisetEnvIncluded(&agent->pcolony->pswarm.global_env, &required_global_env)) {
                     printd(("required_global_env check failed"));
                     executable = FALSE; // this program is not executable, check another program
                     continue;
@@ -485,7 +485,7 @@ bool agent_executeProgram(Agent_t *agent) {
             else if (rule->type == RULE_TYPE_EXTEROCEPTIVE || getFirstRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE) {
                 // if the rule.rhs object is not in the global swarm environement any more
                 //if (self.colony.parentSwarm.global_env[rule.rhs] <= 0):
-                if (!areObjectsInMultisetEnv(&agent->pcolony->pswarm->global_env, rule->rhs, NO_OBJECT)) {
+                if (!areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
                     printe(("Object %d was required in the global swarm environement by rule %d but was not found", rule->rhs, rule_nr));
                     printe(("Please check your rules and try again"));
@@ -497,7 +497,7 @@ bool agent_executeProgram(Agent_t *agent) {
                 if (rule->rhs != OBJECT_ID_E) {
                     // remove one instance of rule.rhs from global swarm env
                     //self.colony.parentSwarm.global_env[rule.rhs] -= 1;
-                    setObjectCountFromMultisetEnv(&agent->pcolony->pswarm->global_env, rule->rhs, COUNT_DECREMENT);
+                    setObjectCountFromMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, COUNT_DECREMENT);
                     //THE OBJECT DELETION IS HANDLED BY setObjectCountFromMultiset()
 
                     // 0 counts are allowed so if this is the case
@@ -510,7 +510,7 @@ bool agent_executeProgram(Agent_t *agent) {
                 if (rule->lhs != OBJECT_ID_E)
                     // transfer object from agent.obj to global swarm environment
                     //self.colony.parentSwarm.global_env[rule.lhs] += 1
-                    setObjectCountFromMultisetEnv(&agent->pcolony->pswarm->global_env, rule->lhs, COUNT_INCREMENT);
+                    setObjectCountFromMultisetEnv(&agent->pcolony->pswarm.global_env, rule->lhs, COUNT_INCREMENT);
 
                 // transfer object from global swarm environment to agent.obj
                 //self.obj[rule.rhs] += 1
@@ -586,7 +586,7 @@ bool agent_executeProgram(Agent_t *agent) {
             else if (getSecondRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE) {
                 // if the rule.alt_rhs object is not in the global swarm environement any more
                 //if (self.colony.parentSwarm.global_env[rule.alt_rhs] <= 0):
-                if (!areObjectsInMultisetEnv(&agent->pcolony->pswarm->global_env, rule->alt_rhs, NO_OBJECT)) {
+                if (!areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->alt_rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
                     printe(("Object %d was required in the global swarm environement by rule %d but was not found", rule->alt_rhs, rule_nr));
                     printe(("Please check your rules and try again"));
@@ -599,7 +599,7 @@ bool agent_executeProgram(Agent_t *agent) {
                 if (rule->alt_rhs != OBJECT_ID_E) {
                     // remove one instance of rule.alt_rhs from global swarm env
                     //self.colony.parentSwarm.global_env[rule.alt_rhs] -= 1;
-                    setObjectCountFromMultisetEnv(&agent->pcolony->pswarm->global_env, rule->alt_rhs, COUNT_DECREMENT);
+                    setObjectCountFromMultisetEnv(&agent->pcolony->pswarm.global_env, rule->alt_rhs, COUNT_DECREMENT);
                     //THE OBJECT DELETION IS HANDLED BY setObjectCountFromMultiset()
 
                     // 0 counts are allowed so if this is the case
@@ -616,7 +616,7 @@ bool agent_executeProgram(Agent_t *agent) {
                 if (rule->alt_lhs != OBJECT_ID_E)
                     // transfer object from agent.obj to environment
                     //self.colony.parentSwarm.global_env[rule.alt_lhs] += 1
-                    setObjectCountFromMultisetEnv(&agent->pcolony->pswarm->global_env, rule->alt_lhs, COUNT_INCREMENT);
+                    setObjectCountFromMultisetEnv(&agent->pcolony->pswarm.global_env, rule->alt_lhs, COUNT_INCREMENT);
             }
         }    // end elif exec_rule_nr == second
     }
@@ -691,4 +691,82 @@ rule_type_t getSecondRuleTypeFromConditional(rule_type_t rule) {
 void initArray(uint8_t *array, uint8_t array_size, uint8_t default_value) {
     for (uint8_t i = 0; i < array_size; i++)
         array[i] = default_value;
+}
+
+
+void initPcolony(Pcolony_t *pcol, uint8_t nr_A, uint8_t nr_agents, uint8_t n) {
+    pcol->nr_A = nr_A;
+    pcol->nr_agents = nr_agents;
+    pcol->n = n;
+
+    //init alphabet
+    pcol->A = (uint8_t *)malloc(sizeof(uint8_t) * pcol->nr_A);
+    initArray(pcol->A, pcol->nr_A, NO_OBJECT); // initialize the alphabet to NO_OBJECT
+    //init environment
+    initMultisetEnv(&pcol->env, pcol->nr_A);
+    //init pswarm global environment
+    initMultisetEnv(&pcol->pswarm.global_env, pcol->nr_A);
+    //init agents
+    pcol->agents = (Agent_t *) malloc(sizeof(Agent_t) * pcol->nr_agents);
+}
+
+void destroyPcolony(Pcolony_t *pcol) {
+    //free alphabet
+    if (pcol->nr_A > 0) {
+        free(pcol->A);
+        pcol->nr_A = 0;
+    }
+
+    //free agents
+    if (pcol->nr_agents > 0) {
+        for (uint8_t i = 0; i < pcol->nr_agents; i++)
+            destroyAgent(&pcol->agents[i]);
+        //free agent list
+        free(pcol->agents);
+        pcol->nr_agents = 0;
+    }
+
+    destroyMultisetEnv(&pcol->env);
+    destroyMultisetEnv(&pcol->pswarm.global_env);
+
+    pcol->n = 0;
+}
+
+void initAgent(Agent_t *agent, Pcolony_t *pcol, uint8_t nr_programs) {
+    agent->nr_programs = nr_programs;
+    agent->chosenProgramNr = -1;
+
+    agent->pcolony = pcol;
+    agent->programs = (Program_t *) malloc(sizeof(Program_t) * agent->nr_programs);
+
+    //initialize the agent's multiset at the size of the P colonies capacity
+    initMultisetObj(&agent->obj, pcol->n);
+}
+
+void destroyAgent(Agent_t *agent) {
+    destroyMultisetObj(&agent->obj);
+
+    //destroy programs
+    if (agent->nr_programs > 0) {
+        for (uint8_t i = 0; i < agent->nr_programs; i++)
+            destroyProgram(&agent->programs[i]);
+        //free the programs list
+        free(agent->programs);
+        agent->nr_programs = 0;
+    }
+
+    agent->pcolony = 0;
+    agent->chosenProgramNr = -1;
+}
+
+void initProgram(Program_t *program, uint8_t nr_rules) {
+    program->nr_rules = nr_rules;
+    program->rules = (Rule_t *) malloc(sizeof(Rule_t) * program->nr_rules);
+}
+
+void destroyProgram(Program_t *program) {
+    if (program->nr_rules > 0) {
+        free(program->rules);
+        program->nr_rules = 0;
+    }
 }
