@@ -371,4 +371,16 @@ void initProgram(Program_t *program, uint8_t nr_rules);
  */
 void destroyProgram(Program_t *program);
 
+/**
+ * @brief Initialize a Rule object with the specified parameters
+ *
+ * @param rule Reference to the Rule that will be initialized
+ * @param type The RULE_TYPE_ value used for this program
+ * @param lhs The OBJECT_ID_ value for the left-hand-side part of the main rule
+ * @param rhs The OBJECT_ID_ value for the right-hand-side part of the main rule
+ * @param alt_lhs The OBJECT_ID_ value for the left-hand-side part of the secondary rule (only set for conditional rules)
+ * @param alt_rhs The OBJECT_ID_ value for the right-hand-side part of the secondary rule (only set for conditional rules)
+ */
+void initRule(Rule_t *rule, rule_type_t type, uint8_t lhs, uint8_t rhs, uint8_t alt_lhs, uint8_t alt_rhs);
+
 #endif

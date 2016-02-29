@@ -770,3 +770,19 @@ void destroyProgram(Program_t *program) {
         program->nr_rules = 0;
     }
 }
+
+void initRule(Rule_t *rule, rule_type_t type, uint8_t lhs, uint8_t rhs, uint8_t alt_lhs, uint8_t alt_rhs) {
+    rule->type = type;
+    rule->lhs = lhs;
+    rule->rhs = rhs;
+
+    if (rule->type >= RULE_TYPE_CONDITIONAL_EVOLUTION_EVOLUTION) {
+        rule->alt_lhs = alt_lhs;
+        rule->alt_rhs = alt_rhs;
+    }
+    // alt_ is not needed for non-conditional rules
+    else {
+        rule->alt_lhs = NO_OBJECT;
+        rule->alt_rhs = NO_OBJECT;
+    }
+}
