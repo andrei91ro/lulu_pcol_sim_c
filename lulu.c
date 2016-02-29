@@ -699,9 +699,6 @@ void initPcolony(Pcolony_t *pcol, uint8_t nr_A, uint8_t nr_agents, uint8_t n) {
     pcol->nr_agents = nr_agents;
     pcol->n = n;
 
-    //init alphabet
-    pcol->A = (uint8_t *)malloc(sizeof(uint8_t) * pcol->nr_A);
-    initArray(pcol->A, pcol->nr_A, NO_OBJECT); // initialize the alphabet to NO_OBJECT
     //init environment
     initMultisetEnv(&pcol->env, pcol->nr_A);
     //init pswarm global environment
@@ -711,11 +708,6 @@ void initPcolony(Pcolony_t *pcol, uint8_t nr_A, uint8_t nr_agents, uint8_t n) {
 }
 
 void destroyPcolony(Pcolony_t *pcol) {
-    //free alphabet
-    if (pcol->nr_A > 0) {
-        free(pcol->A);
-        pcol->nr_A = 0;
-    }
 
     //free agents
     if (pcol->nr_agents > 0) {

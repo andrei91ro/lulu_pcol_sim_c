@@ -127,8 +127,6 @@ struct _Pcolony {
     multiset_env_t env; // store array of objects found in the environment (stored as a multiset using a pair id - nr_objects)
     Agent_t *agents; // agent array
     Pswarm_t pswarm; //reference to Pswarm
-    //for clarity we use variable lenght array for the alphabet
-    uint8_t *A; // alphabet (array of objects)
 };
 
 /******************************************************************************************************************************/
