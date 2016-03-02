@@ -4,24 +4,18 @@
 void lulu_init(Pcolony_t *pcol) {
     //init Pcolony with alphabet size = 4, nr of agents = 2, capacity = 2
     initPcolony(pcol, 4, 2, 2);
-    
-    //init alphabet
-    pcol->A[0] = OBJECT_ID_E;
-    pcol->A[1] = OBJECT_ID_F;
-    pcol->A[2] = OBJECT_ID_D;
-    pcol->A[3] = OBJECT_ID_S;
 
     //init environment
-        pcol->env.items[0].nr = 1;
         pcol->env.items[0].id = OBJECT_ID_E;
+        pcol->env.items[0].nr = 1;
 
-        pcol->env.items[1].nr = 2;
         pcol->env.items[1].id = OBJECT_ID_F;
+        pcol->env.items[1].nr = 2;
     //end init environment
 
     //init global pswarm environment
-        pcol->pswarm.global_env.items[0].nr = 2;
         pcol->pswarm.global_env.items[0].id = OBJECT_ID_E;
+        pcol->pswarm.global_env.items[0].nr = 2;
     //end init global pswarm environment
 
     //init agent command
