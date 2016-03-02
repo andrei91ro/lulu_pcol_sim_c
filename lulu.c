@@ -9,7 +9,13 @@
 #include "lulu.h"
 #include "debug.h"
 #include <malloc.h>
-#include <kilombo/kilolib.h> //for rand_seed, rand_soft
+
+//if building Pcolony simulator for PC
+#ifdef PCOL_SIM
+    #include <stdlib.h> //for rand()
+#else
+    #include <kilombo/kilolib.h> //for rand_seed, rand_soft
+#endif
 
 void initMultisetEnv(multiset_env_t *multiset, uint8_t size) {
     multiset->items = (multiset_env_item_t *)malloc(sizeof(multiset_env_item_t) * size);
@@ -379,8 +385,14 @@ bool agent_choseProgram(Agent_t *agent) {
             }
 
         //rand_value = random.randint(0, len(possiblePrograms) - 1)
-        //obtain random uint_8 in [0, chosen_prg_count-1] interval
-        rand_value = (uint8_t) (( (float) rand_soft() / 255) * (chosen_prg_count - 1));
+        #ifdef PCOL_SIM
+            //use rand() from stdlib.h
+            rand_value = (uint8_t) (( (float) rand() / 255) * (chosen_prg_count - 1));
+        #else
+            //use rand_soft from kilolib.h
+            //obtain random uint_8 in [0, chosen_prg_count-1] interval
+            rand_value = (uint8_t) (( (float) rand_soft() / 255) * (chosen_prg_count - 1));
+        #endif
         //self.chosenProgramNr = possiblePrograms[rand_value];
         agent->chosenProgramNr = aux[rand_value];
         printd(("stochastically_chosen_program =  %d", agent->chosenProgramNr));
