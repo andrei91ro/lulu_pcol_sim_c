@@ -126,6 +126,7 @@ bool setObjectCountFromMultisetEnv(multiset_env_t *multiset, uint8_t obj, uint8_
 
 bool setObjectCountFromMultisetObj(multiset_obj_t *multiset, uint8_t obj, uint8_t newCount) {
     //get current count of obj.
+    uint8_t count_abs_diff = 0;
     uint8_t count = getObjectCountFromMultisetObj(multiset, obj);
     if (newCount == COUNT_INCREMENT)
         newCount = count + 1;
@@ -135,25 +136,48 @@ bool setObjectCountFromMultisetObj(multiset_obj_t *multiset, uint8_t obj, uint8_
     if (newCount == count)
         return FALSE; // There is no change in count so skip the operation
 
-    for (uint8_t i = 0; i < multiset->size; i++)
+    count_abs_diff = (newCount > count)? newCount - count: count - newCount;
+
+    //repeat the add / del operation as many times as needed to make count == newCount
+    for (uint8_t i = 0; i < count_abs_diff; i++)
         // if we are requested to delete an object from the multiset
-        if (newCount <= 0) {
-            // if i is the target object
-            if (multiset->items[i] == obj)
-                //mark this position as empty from now on
-                multiset->items[i] = NO_OBJECT;
-
+        if (newCount < count) {
+            if (!delObjectFromMultisetObj(multiset, obj))
+                return FALSE; //failed to delele one object from multiset
         }
-        // we just need to modify the count of an object from the multiset
+        // we are requested to add an object to the multiset
         else {
-            //if the object was not present in the multiset and we find an empty slot
-            if (count == 0 && multiset->items[i] == NO_OBJECT) {
-                multiset->items[i] = obj;
-                return TRUE;
-            }
+            if (!addObjectToMultisetObj(multiset, obj))
+                return FALSE; //failed to add one object to the multiset
         }
 
-    return FALSE; //the multiset is full (no more empty slots available)
+    //the operation finished succesfully
+    return TRUE;
+}
+
+bool addObjectToMultisetObj(multiset_obj_t *multiset, uint8_t obj) {
+    for (uint8_t i = 0; i < multiset->size; i++)
+        //if we find an empty slot
+        if (multiset->items[i] == NO_OBJECT) {
+            multiset->items[i] = obj;
+            return TRUE;
+        }
+
+    //the target obj was not found (or no empty slot)
+    return FALSE;
+}
+
+bool delObjectFromMultisetObj(multiset_obj_t *multiset, uint8_t obj) {
+    for (uint8_t i = 0; i < multiset->size; i++)
+        // if i is the target object
+        if (multiset->items[i] == obj) {
+            //mark this position as empty from now on
+            multiset->items[i] = NO_OBJECT;
+            return TRUE;
+        }
+
+    //the target obj was not found
+    return FALSE;
 }
 
 bool isMultisetEnvIncluded(multiset_env_t *parent, multiset_env_t *child) {

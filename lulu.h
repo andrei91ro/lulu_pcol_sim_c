@@ -241,6 +241,27 @@ bool setObjectCountFromMultisetEnv(multiset_env_t *multiset, uint8_t obj, uint8_
  */
 bool setObjectCountFromMultisetObj(multiset_obj_t *multiset, uint8_t obj, uint8_t newCount);
 
+
+/**
+ * @brief Adds one symbolic object to a multiset_obj
+ *
+ * @param multiset The multiset where we add an object
+ * @param obj The id of the symbolic object that will be added
+ *
+ * @return TRUE / FALSE depending on the success of the operation
+ */
+bool addObjectToMultisetObj(multiset_obj_t *multiset, uint8_t obj);
+
+/**
+ * @brief Deletes one symbolic object from a multiset_obj
+ *
+ * @param multiset The multiset from where we delete an object
+ * @param obj The id of the symbolic object that will be deleted
+ *
+ * @return TRUE / FALSE depending on the success of the operation
+ */
+bool delObjectFromMultisetObj(multiset_obj_t *multiset, uint8_t obj);
+
 /**
  * @brief Check whether one multiset is included in a parent multiset
  *
