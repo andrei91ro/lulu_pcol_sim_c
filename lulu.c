@@ -200,23 +200,26 @@ bool agent_choseProgram(Agent_t *agent) {
 
                 //all types of rules require the left hand side obj to be available in the agent
                 //if (rule.lhs not in self.obj):
-                if (!areObjectsInMultisetObj(&agent->obj, rule->lhs, NO_OBJECT))
+                if (!areObjectsInMultisetObj(&agent->obj, rule->lhs, NO_OBJECT)) {
                     executable = FALSE;
                     break; //stop checking
+                }
 
                 //communication rules require the right hand side obj to be available in the environement
                 //if (rule.main_type == RuleType.communication and rule.rhs not in self.colony.env):
                 if (rule->type == RULE_TYPE_COMMUNICATION &&
-                        !areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT))
+                        !areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT)) {
                     executable = FALSE;
                     break; //stop checking
+                }
 
                 //exteroceptive rules require the right hand side obj to be available in the global Pswarm environment
                 //if (rule.main_type == RuleType.exteroceptive and rule.rhs not in self.colony.parentSwarm.global_env):
                 if (rule->type == RULE_TYPE_EXTEROCEPTIVE &&
-                        !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT))
+                        !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) {
                     executable = FALSE;
                     break; //stop checking
+                }
 
                 rule->exec_rule_nr = RULE_EXEC_OPTION_FIRST; //the only option available
 
