@@ -24,6 +24,13 @@ enum agents {
     AGENT_MOTION,
 };
 
+//if building Pcolony simulator for PC
+#ifdef PCOL_SIM
+    //define array of names for objects and agents for debug
+    extern char **objectNames;
+    extern char **agentNames;
+#endif
+
 /**
  * @brief Initialises the pcol object and all of it's components
  *
