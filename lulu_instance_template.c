@@ -2,8 +2,8 @@
 #include <malloc.h>
 #ifdef PCOL_SIM
     #include <string.h>
-    char **objectNames;
-    char **agentNames;
+    char* objectNames[] = {[NO_OBJECT] = "no_object", [OBJECT_ID_L_M] = "l_m", [OBJECT_ID_L_P] = "l_p",[OBJECT_ID_L_Z] = "l_z", [OBJECT_ID_E] = "e", [OBJECT_ID_F] = "f"};
+    char* agentNames[] = {[AGENT_MOTION] = "motion"};
 #endif
 void lulu_init(Pcolony_t *pcol) {
     //init Pcolony with alphabet size = 4, nr of agents = 2, capacity = 2
