@@ -1,9 +1,15 @@
 CC = gcc
+DEBUG = 0
 
-#debug & testing flags
-CFLAGS = -Wall -g -O0 -fbuiltin -c -DPCOL_SIM -DDEBUG=0
-BFLAGS = -Wall -g -O0 -fbuiltin -DPCOL_SIM -DDEBUG=0
-
+ifeq ($(DEBUG),1)
+  #debug & testing flags
+  CFLAGS = -Wall -g -O0 -fbuiltin -c -DPCOL_SIM -DDEBUG=0 -std=c99
+  BFLAGS = -Wall -g -O0 -fbuiltin -DPCOL_SIM -DDEBUG=0
+else
+  # release flags
+  CFLAGS = -Wall -g -O2 -c -DPCOL_SIM -DDEBUG=1 -std=c99
+  BFLAGS = -Wall -g -O2 -DPCOL_SIM -DDEBUG=1
+endif
 # path to the LULU P colony simulator
 LULU_PCOL_SIM_PATH = /home/andrei/script_Python/lulu_pcol_sim
 # path to the LULU P colony simulator script
