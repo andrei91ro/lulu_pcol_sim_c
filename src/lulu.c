@@ -8,13 +8,11 @@
  */
 #include "lulu.h"
 #include "debug.h"
-#include <malloc.h>
+#include <stdlib.h> //for rand() on PC and malloc on PC and AVR
 
-//if building Pcolony simulator for PC
-#ifdef PCOL_SIM
-    #include <stdlib.h> //for rand()
-#else
-    #include <kilombo/kilolib.h> //for rand_seed, rand_soft
+//if building Pcolony simulator for AVR (Kilobot)
+#ifdef KILOBOT
+    #include "kilolib.h" //for rand_seed, rand_soft
 #endif
 
 void initMultisetEnv(multiset_env_t *multiset, uint8_t size) {
@@ -28,7 +26,7 @@ void initMultisetEnv(multiset_env_t *multiset, uint8_t size) {
 
 void initMultisetObj(multiset_obj_t *multiset, uint8_t size) {
     multiset->items = (uint8_t *)malloc(sizeof(uint8_t) * size);
-    for (uint8_t i = 0; i < size; i++) 
+    for (uint8_t i = 0; i < size; i++)
         multiset->items[i] = NO_OBJECT; // = -1
     multiset->size = size;
 }
@@ -52,7 +50,7 @@ void destroyMultisetObj(multiset_obj_t *multiset) {
 bool areObjectsInMultisetEnv(multiset_env_t *multiset, uint8_t obj1, uint8_t obj2) {
     for (uint8_t i = 0; i < multiset->size; i++)
         // there is no point in checking for NO_OBJECT as this is the initial value
-        if ((multiset->items[i].id == obj1 && obj1 != NO_OBJECT) || 
+        if ((multiset->items[i].id == obj1 && obj1 != NO_OBJECT) ||
                 (multiset->items[i].id == obj2 && obj2 != NO_OBJECT))
             return TRUE;
 
@@ -412,7 +410,7 @@ bool agent_choseProgram(Agent_t *agent) {
             }
 
         //rand_value = random.randint(0, len(possiblePrograms) - 1)
-        #ifdef PCOL_SIM
+        #if defined(PCOL_SIM) || defined(SIMULATOR)
             //use rand() from stdlib.h
             rand_value = (uint8_t) (( (float) rand() / 255) * (chosen_prg_count - 1));
         #else
