@@ -693,16 +693,17 @@ sim_step_result_t pcolony_runSimulationStep(Pcolony_t *pcolony) {
         return SIM_STEP_RESULT_NO_MORE_EXECUTABLES; // simulation cannot continue
 
     //for agent_name in runnableAgents:
-    for (uint8_t agent_nr = 0; agent_nr < pcolony->nr_agents; agent_nr++) {
-        agent = &pcolony->agents[agent_nr];
-        //printi("Running Agent %s  P%d = < %s >" % (agent_name, self.agents[agent_name].chosenProgramNr, self.agents[agent_name].programs[self.agents[agent_name].chosenProgramNr].print(onlyExecutable = True)))
-        printi(("Running Agent %d  P%d", agent_nr, agent->chosenProgramNr));
-        // if there were errors encountered during program execution
-        if (!agent_executeProgram(agent)) {
-            printe(("Execution failed for agent %d, stopping simulation", agent_nr));
-            return SIM_STEP_RESULT_ERROR;
+    for (uint8_t agent_nr = 0; agent_nr < pcolony->nr_agents; agent_nr++)
+        if (runnableAgents[agent_nr]) {
+            agent = &pcolony->agents[agent_nr];
+            //printi("Running Agent %s  P%d = < %s >" % (agent_name, self.agents[agent_name].chosenProgramNr, self.agents[agent_name].programs[self.agents[agent_name].chosenProgramNr].print(onlyExecutable = True)))
+            printi(("Running Agent %d  P%d", agent_nr, agent->chosenProgramNr));
+            // if there were errors encountered during program execution
+            if (!agent_executeProgram(agent)) {
+                printe(("Execution failed for agent %d, stopping simulation", agent_nr));
+                return SIM_STEP_RESULT_ERROR;
+            }
         }
-    }
     printi(("Simulation step finished succesfully"));
     //return SimStepResult.finished
     return SIM_STEP_RESULT_FINISHED;
