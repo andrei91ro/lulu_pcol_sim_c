@@ -19,12 +19,12 @@ KILOLIB_LIB = $(KILOLIB_HEADERS)/build/kilolib.a
 
 ifeq ($(DEBUG),1)
   #debug & testing flags
-  CFLAGS = -Wall -g -O0 -fbuiltin -c -DPCOL_SIM -DDEBUG=0 -std=c99
-  BFLAGS = -Wall -g -O0 -fbuiltin -DPCOL_SIM -DDEBUG=0
+  CFLAGS = -Wall -g -O0 -fbuiltin -c -DPCOL_SIM -DDEBUG_PRINT=0 -std=c99
+  BFLAGS = -Wall -g -O0 -fbuiltin -DPCOL_SIM -DDEBUG_PRINT=0
 else
   # release flags
-  CFLAGS = -Wall -g -O2 -c -DPCOL_SIM -DDEBUG=1 -std=c99
-  BFLAGS = -Wall -g -O2 -DPCOL_SIM -DDEBUG=1
+  CFLAGS = -Wall -g -O2 -c -DPCOL_SIM -DDEBUG_PRINT=1 -std=c99
+  BFLAGS = -Wall -g -O2 -DPCOL_SIM -DDEBUG_PRINT=1
 endif
 
 CFLAGS_AVR = -c -mmcu=atmega328p -Wall -gdwarf-2 -O3 -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -DF_CPU=8000000 -I$(KILOLIB_HEADERS) -DKILOBOT

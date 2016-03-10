@@ -4,7 +4,7 @@
 #endif
 #include "lulu.h"
 #include "instance.h"
-#include "debug.h"
+#include "debug_print.h"
 #include <stdlib.h> //for rand(), srand()
 #include <stdio.h>
 #include <string.h> //for strcpy

@@ -7,7 +7,7 @@
  * @date 2016-02-27
  */
 #include "lulu.h"
-#include "debug.h"
+#include "debug_print.h"
 #include <stdlib.h> //for rand() on PC and malloc on PC and AVR
 
 //if building Pcolony simulator for AVR (Kilobot)
@@ -410,7 +410,7 @@ bool agent_choseProgram(Agent_t *agent) {
             }
 
         //rand_value = random.randint(0, len(possiblePrograms) - 1)
-        #if defined(PCOL_SIM) || defined(SIMULATOR)
+        #ifndef KILOBOT
             //use rand() from stdlib.h
             rand_value = (uint8_t) (( (float) rand() / 255) * (chosen_prg_count - 1));
         #else
