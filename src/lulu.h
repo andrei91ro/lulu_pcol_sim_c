@@ -426,4 +426,16 @@ void destroyProgram(Program_t *program);
  */
 void initRule(Rule_t *rule, rule_type_t type, uint8_t lhs, uint8_t rhs, uint8_t alt_lhs, uint8_t alt_rhs);
 
+/**
+ * @brief Replaces one symbolic object from a program with another object
+ * This method replaces all instances of the initial_obj found in the program
+ *
+ * @param program The program where the inital object resides
+ * @param initial_obj The id of the symbolic object that will be replaced
+ * @param final_obj The id of the symbolic object that will replace the initial object
+ *
+ * @return TRUE / FALSE depending on the success of the operation
+ * @see replaceObjInMultisetEnv replaceObjInMultisetEnv
+ */
+bool replaceObjInProgram(Program_t *program, uint8_t initial_obj, uint8_t final_obj);
 #endif

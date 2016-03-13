@@ -843,3 +843,28 @@ void initRule(Rule_t *rule, rule_type_t type, uint8_t lhs, uint8_t rhs, uint8_t 
         rule->alt_rhs = NO_OBJECT;
     }
 }
+
+bool replaceObjInProgram(Program_t *program, uint8_t initial_obj, uint8_t final_obj) {
+    bool initialObjectFound = FALSE;
+
+    for (uint8_t rule_nr = 0; rule_nr < program->nr_rules; rule_nr++) {
+        if (program->rules[rule_nr].lhs == initial_obj) {
+            initialObjectFound = TRUE;
+            program->rules[rule_nr].lhs = final_obj;
+        }
+        if (program->rules[rule_nr].rhs == initial_obj) {
+            initialObjectFound = TRUE;
+            program->rules[rule_nr].rhs = final_obj;
+        }
+        if (program->rules[rule_nr].alt_lhs == initial_obj) {
+            initialObjectFound = TRUE;
+            program->rules[rule_nr].alt_lhs = final_obj;
+        }
+        if (program->rules[rule_nr].alt_rhs == initial_obj) {
+            initialObjectFound = TRUE;
+            program->rules[rule_nr].alt_rhs = final_obj;
+        }
+    }
+
+    return initialObjectFound;
+}
