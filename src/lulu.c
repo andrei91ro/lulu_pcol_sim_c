@@ -196,6 +196,33 @@ bool isMultisetObjIncluded(multiset_obj_t *parent, multiset_obj_t *child) {
     return TRUE;
 }
 
+bool replaceObjInMultisetEnv(multiset_env_t *multiset, uint8_t initial_obj, uint8_t final_obj) {
+    for (uint8_t i = 0; i < multiset->size; i++)
+        if (multiset->items[i].id == initial_obj) {
+            multiset->items[i].id = final_obj;
+            // we replaced the initial_obj and there should be no other entry in the multiset with
+            // this id, so we return
+            return TRUE;
+        }
+
+    //the initial object was not found
+    return FALSE;
+}
+
+bool replaceObjInMultisetObj(multiset_obj_t *multiset, uint8_t initial_obj, uint8_t final_obj) {
+    bool initialObjectFound = FALSE;
+
+    for (uint8_t i = 0; i < multiset->size; i++)
+        if (multiset->items[i] == initial_obj) {
+            multiset->items[i] = final_obj;
+            initialObjectFound = TRUE;
+            //replace all instaces of the inital_obj
+        }
+
+    //the initial object was not found
+    return initialObjectFound;
+}
+
 bool agent_choseProgram(Agent_t *agent) {
     Rule_t *rule;
     multiset_env_t required_env, required_global_env;

@@ -282,6 +282,30 @@ bool isMultisetEnvIncluded(multiset_env_t *parent, multiset_env_t *child);
  */
 bool isMultisetObjIncluded(multiset_obj_t *parent, multiset_obj_t *child);
 
+/**
+ * @brief Replaces one symbolic object from a multiset with another object
+ * This method only changes the id of the initial object to the final one,
+ * not the associated number of appearences. 
+ *
+ * @param multiset The multiset where the inital object resides
+ * @param initial_obj The id of the symbolic object that will be replaced
+ * @param final_obj The id of the symbolic object that will replace the initial object
+ *
+ * @return TRUE / FALSE depending on the success of the operation
+ */
+bool replaceObjInMultisetEnv(multiset_env_t *multiset, uint8_t initial_obj, uint8_t final_obj);
+
+/**
+ * @brief Replaces one symbolic object from a multiset with another object
+ * This method replaces all instances of the initial_obj found in the multiset
+ *
+ * @param multiset The multiset where the inital object resides
+ * @param initial_obj The id of the symbolic object that will be replaced
+ * @param final_obj The id of the symbolic object that will replace the initial object
+ *
+ * @return TRUE / FALSE depending on the success of the operation
+ */
+bool replaceObjInMultisetObj(multiset_obj_t *multiset, uint8_t initial_obj, uint8_t final_obj);
 /******************************************************************************************************************************/
 //end Multiset auxiliary functions
 
