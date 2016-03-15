@@ -9,7 +9,9 @@ LULU_PCOL_SIM = $(LULU_PCOL_SIM_PATH)/sim.py
 # path to the lulu to C converter script
 LULU_C = /home/andrei/script_Python/lulu_c/lulu_c.py
 # path to one example instance file (can be set as an Environment variable to any Lulu formatted input file)
-LULU_INSTANCE_FILE = $(LULU_PCOL_SIM_PATH)/input_files/input_ag_decrement.txt
+# 3 robots in the swarm
+# 70 is the minimum kilo_uid
+LULU_INSTANCE_FILE = wild_pcol.lulu 3 70
 # path to the Kilombo headers
 KILOMBO_HEADERS = /usr/include
 # path to the Kilolib headers -- only needed for AVR

@@ -1,10 +1,16 @@
 #include "lulu_instance_template.h"
-#include <malloc.h>
+#include <stdlib.h>
 #ifdef PCOL_SIM
     #include <string.h>
     char* objectNames[] = {[NO_OBJECT] = "no_object", [OBJECT_ID_L_M] = "l_m", [OBJECT_ID_L_P] = "l_p",[OBJECT_ID_L_Z] = "l_z", [OBJECT_ID_E] = "e", [OBJECT_ID_F] = "f"};
     char* agentNames[] = {[AGENT_MOTION] = "motion"};
 #endif
+
+//the smallest kilo_uid from the swarm
+const uint8_t smallest_robot_uid = 70;
+//the number of robots that make up the swarm
+const uint8_t nr_swarm_robots = 3;
+
 void lulu_init(Pcolony_t *pcol) {
     //init Pcolony with alphabet size = 4, nr of agents = 2, capacity = 2
     initPcolony(pcol, 4, 2, 2);
@@ -74,4 +80,31 @@ void lulu_destroy(Pcolony_t *pcol) {
             free(agentNames[i]);
         free(agentNames);
     #endif
+}
+
+uint8_t expand_pcolony(Pcolony_t *pcol, uint8_t my_id) {
+    //used for a cleaner iteration through the P colony
+    //instead of using agents[i] all of the time, we use just agent
+    Agent_t *agent;
+    uint8_t obj_with_id[] = {OBJECT_ID_B_$id, OBJECT_ID_S_$id, OBJECT_ID_ID_$id};
+    uint8_t obj_with_id_size = 3;
+
+    uint8_t my_symbolic_id = my_id - smallest_robot_uid;
+
+    for (uint8_t i = 0; i < obj_with_id_size; i++) {
+        //OBJECT_ID_B_$id is followed by OBJECT_ID_B_0
+        replaceObjInMultisetEnv(&pcol->env, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
+
+        for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
+            agent = &pcol->agents[agent_nr];
+            //replace $id in each agent's obj
+            //OBJECT_ID_B_$id is followed by OBJECT_ID_B_0
+            replaceObjInMultisetObj(&agent->obj, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
+
+            for (uint8_t program_nr = 0; program_nr < agent->nr_programs; program_nr++)
+                replaceObjInProgram(&agent->programs[program_nr], obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
+        }
+    }
+
+    return my_symbolic_id;
 }
