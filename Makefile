@@ -11,7 +11,7 @@ LULU_C = /home/andrei/script_Python/lulu_c/lulu_c.py
 # path to one example instance file (can be set as an Environment variable to any Lulu formatted input file)
 # 3 robots in the swarm
 # 70 is the minimum kilo_uid
-LULU_INSTANCE_FILE = wild_pcol.lulu 3 70
+LULU_INSTANCE_FILE = wild_pcol.lulu pi 3 70
 # path to the Kilombo headers
 KILOMBO_HEADERS = /usr/include
 # path to the Kilolib headers -- only needed for AVR

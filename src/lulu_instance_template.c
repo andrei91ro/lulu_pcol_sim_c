@@ -94,6 +94,7 @@ uint8_t expand_pcolony(Pcolony_t *pcol, uint8_t my_id) {
     for (uint8_t i = 0; i < obj_with_id_size; i++) {
         //OBJECT_ID_B_$id is followed by OBJECT_ID_B_0
         replaceObjInMultisetEnv(&pcol->env, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
+        replaceObjInMultisetEnv(&pcol->pswarm.global_env, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
 
         for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
             agent = &pcol->agents[agent_nr];
