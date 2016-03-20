@@ -445,7 +445,7 @@ bool agent_choseProgram(Agent_t *agent) {
         //rand_value = random.randint(0, len(possiblePrograms) - 1)
         #ifndef KILOBOT
             //use rand() from stdlib.h
-            rand_value = (uint8_t) (( (float) rand() / 255) * (chosen_prg_count - 1));
+            rand_value = (uint8_t) (( (float) rand() / RAND_MAX) * (chosen_prg_count - 1));
         #else
             //use rand_soft from kilolib.h
             //obtain random uint_8 in [0, chosen_prg_count-1] interval
