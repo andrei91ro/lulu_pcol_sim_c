@@ -15,6 +15,12 @@
     #include "kilolib.h" //for rand_seed, rand_soft
 #endif
 
+//bitmasks that show where is the searched object (isObjectInProgram()) located within the program
+const uint8_t OBJECT_IS_PROGRAM_LHS     = 1;    //Left Hand Side object is the searched object
+const uint8_t OBJECT_IS_PROGRAM_RHS     = 1<<1; //Right Hand Side object is the searched object
+const uint8_t OBJECT_IS_PROGRAM_ALT_LHS = 1<<2; //Alternative Left Hand Side is the searched object
+const uint8_t OBJECT_IS_PROGRAM_ALT_RHS = 1<<3; //Alternative Right Hand Side is the searched object
+
 void initMultisetEnv(multiset_env_t *multiset, uint8_t size) {
     multiset->items = (multiset_env_item_t *)malloc(sizeof(multiset_env_item_t) * size);
     for (uint8_t i = 0; i < size; i++) {
@@ -772,6 +778,79 @@ void initPcolony(Pcolony_t *pcol, uint8_t nr_A, uint8_t nr_agents, uint8_t n) {
     pcol->agents = (Agent_t *) malloc(sizeof(Agent_t) * pcol->nr_agents);
 }
 
+void replacePcolonyWildID(Pcolony_t *pcol, uint8_t obj_with_id[], uint8_t obj_with_id_size, uint8_t my_symbolic_id) {
+    Agent_t *agent;
+
+    for (uint8_t i = 0; i < obj_with_id_size; i++) {
+        //OBJECT_ID_B_$id is followed by OBJECT_ID_B_0
+        replaceObjInMultisetEnv(&pcol->env, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
+        replaceObjInMultisetEnv(&pcol->pswarm.global_env, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
+
+        for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
+            agent = &pcol->agents[agent_nr];
+            //replace $id in each agent's obj
+            //OBJECT_ID_B_$id is followed by OBJECT_ID_B_0
+            replaceObjInMultisetObj(&agent->obj, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
+
+            for (uint8_t program_nr = 0; program_nr < agent->nr_programs; program_nr++)
+                replaceObjInProgram(&agent->programs[program_nr], obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
+        }
+    }
+}
+
+void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_obj_with_any_followed_by_id[], uint8_t obj_with_any_size, uint8_t my_symbolic_id, uint8_t nr_swarm_robots) {
+    for (uint8_t any_id = 0; any_id < obj_with_any_size; any_id++) {
+        //if for e.g B_$ exists in the environment, then replace it with the expansion
+        if (areObjectsInMultisetEnv(&pcol->env, obj_with_any[any_id], NO_OBJECT))
+            for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
+                if (robot_id != my_symbolic_id)
+                    setObjectCountFromMultisetEnv(&pcol->env,
+                            obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id,
+                            COUNT_INCREMENT);
+
+        //if for e.g B_$ exists in the global swarm environment, then replace it with the expansion
+        if (areObjectsInMultisetEnv(&pcol->pswarm.global_env, obj_with_any[any_id], NO_OBJECT))
+            for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
+                if (robot_id != my_symbolic_id)
+                    setObjectCountFromMultisetEnv(&pcol->pswarm.global_env,
+                            obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id,
+                            COUNT_INCREMENT);
+
+        for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
+            //if for e.g B_$ exists in this agent's obj, then replace it with the expansion
+            if (areObjectsInMultisetObj(&pcol->agents[agent_nr].obj, obj_with_any[any_id], NO_OBJECT))
+                for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
+                    setObjectCountFromMultisetObj(&pcol->agents[agent_nr].obj,
+                            obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id,
+                            COUNT_INCREMENT);
+
+            //if all programs have been initialised (init_program_nr == nr_programs -1), then there is no need for wildcard any $ expansion
+            if (pcol->agents[agent_nr].init_program_nr != pcol->agents[agent_nr].nr_programs - 1)
+                for (uint8_t program_nr = 0; program_nr < pcol->agents[agent_nr].nr_programs; program_nr++)
+                    //if wild_position > 0 then this wildcard object exists within the rules of the program
+                    if (isObjectInProgram(&pcol->agents[agent_nr].programs[program_nr], obj_with_any[any_id])) {
+                        for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
+                            if (robot_id != my_symbolic_id) {
+                                //create a copy of the current program and place it at the end of the initialized program list for this agent
+                                copyProgram(&pcol->agents[agent_nr].programs[pcol->agents[agent_nr].init_program_nr],
+                                        &pcol->agents[agent_nr].programs[program_nr]);
+
+                                //replace any occurence of the $ wildcard in any rule of the program with the current robot_id value, for e.g. B_0, B_1, ...
+                                replaceObjInProgram(&pcol->agents[agent_nr].programs[pcol->agents[agent_nr].init_program_nr],
+                                        obj_with_any[any_id],
+                                        obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id);
+
+                                //another program has been initialized
+                                pcol->agents[agent_nr].init_program_nr++;
+                            }
+
+                        //we finished expanding this wildcarded program, so remove this program
+                        destroyProgram(&pcol->agents[agent_nr].programs[program_nr]);
+                    }
+        }
+    }
+}
+
 void destroyPcolony(Pcolony_t *pcol) {
 
     //free agents
@@ -792,6 +871,7 @@ void destroyPcolony(Pcolony_t *pcol) {
 void initAgent(Agent_t *agent, Pcolony_t *pcol, uint8_t nr_programs) {
     agent->nr_programs = nr_programs;
     agent->chosenProgramNr = -1;
+    agent->init_program_nr = 0;
 
     agent->pcolony = pcol;
     agent->programs = (Program_t *) malloc(sizeof(Program_t) * agent->nr_programs);
@@ -819,6 +899,17 @@ void destroyAgent(Agent_t *agent) {
 void initProgram(Program_t *program, uint8_t nr_rules) {
     program->nr_rules = nr_rules;
     program->rules = (Rule_t *) malloc(sizeof(Rule_t) * program->nr_rules);
+}
+
+void copyProgram(Program_t *destination, Program_t *source) {
+    initProgram(destination, source->nr_rules);
+    for (uint8_t rule_nr = 0; rule_nr < source->nr_rules; rule_nr++)
+        initRule(&destination->rules[rule_nr],
+                source->rules[rule_nr].type,
+                source->rules[rule_nr].lhs,
+                source->rules[rule_nr].rhs,
+                source->rules[rule_nr].alt_lhs,
+                source->rules[rule_nr].alt_rhs);
 }
 
 void destroyProgram(Program_t *program) {
@@ -867,4 +958,26 @@ bool replaceObjInProgram(Program_t *program, uint8_t initial_obj, uint8_t final_
     }
 
     return initialObjectFound;
+}
+
+bool isObjectInProgram(Program_t *program, uint8_t obj) {
+    for (uint8_t rule_nr = 0; rule_nr < program->nr_rules; rule_nr++)
+        if (isObjectInRule(&program->rules[rule_nr], obj))
+            return TRUE;
+    return FALSE;
+}
+
+uint8_t isObjectInRule(Rule_t *rule, uint8_t obj) {
+    uint8_t response = 0;
+
+    if (rule->lhs == obj)
+        response |= OBJECT_IS_PROGRAM_LHS;
+    else if (rule->rhs == obj)
+        response |= OBJECT_IS_PROGRAM_RHS;
+    else if (rule->alt_lhs == obj)
+        response |= OBJECT_IS_PROGRAM_ALT_LHS;
+    else if (rule->alt_rhs == obj)
+        response |= OBJECT_IS_PROGRAM_ALT_RHS;
+
+    return response;
 }

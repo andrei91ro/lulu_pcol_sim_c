@@ -26,6 +26,12 @@
 
 typedef uint8_t bool;
 
+//bitmasks that show where is the searched object (isObjectInRule()) located within the rule
+extern const uint8_t OBJECT_IS_RULE_LHS; //Left Hand Side object is the searched object
+extern const uint8_t OBJECT_IS_RULE_RHS; //Right Hand Side object is the searched object
+extern const uint8_t OBJECT_IS_RULE_ALT_LHS; //Alternative Left Hand Side is the searched object
+extern const uint8_t OBJECT_IS_RULE_ALT_RHS; //Alternative Right Hand Side is the searched object
+
 /**
  * @brief Enumeration of rule selection options (used mainly for marking the executable rule from a conditional rule)
  */
@@ -100,7 +106,8 @@ struct _Program {
  */
 struct _Agent {
     uint8_t nr_programs,
-            chosenProgramNr; // the program number that was chosen for execution
+            chosenProgramNr, // the program number that was chosen for execution
+            init_program_nr; //the number of programs that were initialized
     Pcolony_t *pcolony; // reference to my parent colony (for acces to env)
 
     //we could have used Program_t programs[] but in struct we are only alowed ONE variable lenght array
@@ -375,6 +382,32 @@ void initArray(uint8_t *array, uint8_t array_size, uint8_t default_value);
 void initPcolony(Pcolony_t *pcol, uint8_t nr_A, uint8_t nr_agents, uint8_t n);
 
 /**
+ * @brief Replaces the $ID wildcard object into the object corresponding to the symbolic id, in all structures of the Pcolony
+ * E.g for obj_with_id[OBJECT_ID_B_$ID] and my_symbolic_id = 2 then OBJECT_ID_B_$ID -> OBJECT_ID_B_2 in Pcolony.env,
+ * Pswarm.global_env, any Agent.obj and in any rule that contains the wildcarded object
+ *
+ * @param pcol The Pcolony where the replacement takes place
+ * @param obj_with_id[] The array of objects that contain the $ID wildcard
+ * @param obj_with_id_size The size (number of elements) in the obj_with_id array
+ * @param my_symbolic_id The computed symbolic id of this robot
+ */
+void replacePcolonyWildID(Pcolony_t *pcol, uint8_t obj_with_id[], uint8_t obj_with_id_size, uint8_t my_symbolic_id);
+
+/**
+ * @brief Expands the $ wildcard object into all of the objects (0 -> nr_swarm_robots) except my_symbolic_id in all of the structures of the Pcolony
+ * E.g for obj_with_any[OBJECT_ID_B_$] and nr_swarm_robots = 3 then OBJECT_ID_B_$ -> [OBJECT_ID_B_0, OBJECT_ID_B_1, OBJECT_ID_B_2]
+ * in Pcolony.env, Pswarm.global_env, any Agent.obj and in any rule that contains the wildcarded object
+ *
+ * @param pcol The Pcolony where the expansion takes place
+ * @param obj_with_any[] The array of objects that contain the $ wildcard
+ * @param is_obj_with_any_followed_by_id[] An array that specifies (with 0 / 1) whether each element in obj_with_any[] is or not followed by and $ID object
+ * @param obj_with_any_size The size (number of elements) in the obj_with_any array (applies to is_obj_with_any_followed_by_id[])
+ * @param my_symbolic_id The computed symbolic id of this robot
+ * @param nr_swarm_robots The total number of swarm robots. This number is used for the actual expansion (0 .. nr_swarm_robots - 1)
+ */
+void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_obj_with_any_followed_by_id[], uint8_t obj_with_any_size, uint8_t my_symbolic_id, uint8_t nr_swarm_robots);
+
+/**
  * @brief Destroy a P colony object and deallocate all ocupied space
  * This method also destroys all of the contained agents
  *
@@ -408,6 +441,14 @@ void destroyAgent(Agent_t *agent);
 void initProgram(Program_t *program, uint8_t nr_rules);
 
 /**
+ * @brief Create a deep-copy of the source program and store it into the destination program
+ *
+ * @param destination Program where the copy will be stored
+ * @param source Program that will be copied
+ */
+void copyProgram(Program_t *destination, Program_t *source);
+
+/**
  * @brief Destroy a Program object and deallocate all ocupied space
  *
  * @param program The program that will be destroyed
@@ -438,4 +479,24 @@ void initRule(Rule_t *rule, rule_type_t type, uint8_t lhs, uint8_t rhs, uint8_t 
  * @see replaceObjInMultisetEnv replaceObjInMultisetEnv
  */
 bool replaceObjInProgram(Program_t *program, uint8_t initial_obj, uint8_t final_obj);
+
+/**
+ * @brief Check that the provided symbolic object is present in the rule
+ *
+ * @param rule The rule that is searched (haystack)
+ * @param obj1 The object that is searched (needle)
+ *
+ * @return OBJECT_IS_RULE_* values (in a bitwise or combination, depending on the presence of the object) e.g. OBJECT_IS_RULE_LHS | OBJECT_IS_RULE_ALT_RHS
+ */
+uint8_t isObjectInRule(Rule_t *rule, uint8_t obj);
+
+/**
+ * @brief Check that the provided symbolic objects is present in the program
+ *
+ * @param program The program that is searched (haystack)
+ * @param obj1 The object that is searched (needle)
+ *
+ * @return TRUE / FALSE depending on the presence of the object in the program
+ */
+uint8_t isObjectInProgram(Program_t *program, uint8_t obj);
 #endif
