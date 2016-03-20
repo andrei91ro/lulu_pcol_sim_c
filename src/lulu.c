@@ -824,8 +824,10 @@ void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_ob
                             obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id,
                             COUNT_INCREMENT);
 
-            //if all programs have been initialised (init_program_nr == nr_programs -1), then there is no need for wildcard any $ expansion
-            if (pcol->agents[agent_nr].init_program_nr != pcol->agents[agent_nr].nr_programs - 1)
+            //if all programs have been initialised (init_program_nr == nr_programs), then there is no need for wildcard any $ expansion
+            if (pcol->agents[agent_nr].init_program_nr != pcol->agents[agent_nr].nr_programs) {
+                uint8_t expanded_programs = 0;
+
                 for (uint8_t program_nr = 0; program_nr < pcol->agents[agent_nr].nr_programs; program_nr++)
                     //if wild_position > 0 then this wildcard object exists within the rules of the program
                     if (isObjectInProgram(&pcol->agents[agent_nr].programs[program_nr], obj_with_any[any_id])) {
@@ -846,7 +848,26 @@ void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_ob
 
                         //we finished expanding this wildcarded program, so remove this program
                         destroyProgram(&pcol->agents[agent_nr].programs[program_nr]);
+                        //count this expanded program
+                        expanded_programs++;
                     }
+
+                //construct a new program list for this agent that does not constain empty (no rules) programs - programs that were originally
+                //wildcard-any programs and were expanded and afterwards deleted
+                Program_t *new_programs = (Program_t *) malloc(sizeof(Program_t) * (pcol->agents[agent_nr].nr_programs - expanded_programs));
+                uint8_t current_pos = 0;
+                for (uint8_t i = 0; i < pcol->agents[agent_nr].nr_programs; i++)
+                    if (pcol->agents[agent_nr].programs[i].nr_rules > 0) {
+                        copyProgram(&new_programs[current_pos++], &pcol->agents[agent_nr].programs[i]);
+                        destroyProgram(&pcol->agents[agent_nr].programs[i]);
+                    }
+                //remove the old list
+                free(pcol->agents[agent_nr].programs);
+                //assign the new list (will be cleared by destroyAgent() just as the original list)
+                pcol->agents[agent_nr].programs = new_programs;
+                //we removed the wildcard any programs
+                pcol->agents[agent_nr].nr_programs -= expanded_programs;
+            }
         }
     }
 }
