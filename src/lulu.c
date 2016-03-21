@@ -13,6 +13,8 @@
 //if building Pcolony simulator for AVR (Kilobot)
 #ifdef KILOBOT
     #include "kilolib.h" //for rand_seed, rand_soft
+#else
+    #include <time.h> //for time(0) used as seed in initPcolony
 #endif
 
 //bitmasks that show where is the searched object (isObjectInProgram()) located within the program
@@ -33,8 +35,19 @@ void initMultisetEnv(multiset_env_t *multiset, uint8_t size) {
 void initMultisetObj(multiset_obj_t *multiset, uint8_t size) {
     multiset->items = (uint8_t *)malloc(sizeof(uint8_t) * size);
     for (uint8_t i = 0; i < size; i++)
-        multiset->items[i] = NO_OBJECT; // = -1
+        multiset->items[i] = NO_OBJECT;
     multiset->size = size;
+}
+
+void clearMultisetEnv(multiset_env_t *multiset) {
+    for (uint8_t i = 0; i < multiset->size; i++) {
+        multiset->items[i].id = NO_OBJECT;
+        multiset->items[i].nr = 0;
+    }
+}
+void clearMultisetObj(multiset_obj_t *multiset) {
+    for (uint8_t i = 0; i < multiset->size; i++)
+        multiset->items[i] = NO_OBJECT;
 }
 
 void destroyMultisetEnv(multiset_env_t *multiset) {
@@ -246,6 +259,10 @@ bool agent_choseProgram(Agent_t *agent) {
 
     for (uint8_t prg_nr = 0; prg_nr < agent->nr_programs; prg_nr++) {
         bool executable = TRUE;
+        //by clearing the multisets before checking each program, we fix the bug related to required_env failed for more than one program
+        clearMultisetObj(&required_obj);
+        clearMultisetEnv(&required_env);
+        clearMultisetEnv(&required_global_env);
 
         for (uint8_t rule_nr = 0; rule_nr < agent->programs[prg_nr].nr_rules; rule_nr++) {
             rule = &agent->programs[prg_nr].rules[rule_nr];
@@ -369,7 +386,7 @@ bool agent_choseProgram(Agent_t *agent) {
             //for k, v in required_obj.items():
                 //if (self.obj[k] < v):
             if (!isMultisetObjIncluded(&agent->obj, &required_obj)) {
-                    printd(("required_obj check failed"));
+                    printd(("required_obj check failed for P%d", prg_nr));
                     executable = FALSE; // this program is not executable, check another program
                     continue;
             }
@@ -383,7 +400,7 @@ bool agent_choseProgram(Agent_t *agent) {
             //for k, v in required_env.items():
                 //if (self.colony.env[k] < v):
             if (!isMultisetEnvIncluded(&agent->pcolony->env, &required_env)) {
-                    printd(("required_env check failed"));
+                    printd(("required_env check failed for P%d", prg_nr));
                     executable = FALSE; // this program is not executable, check another program
                     continue;
             }
@@ -397,7 +414,7 @@ bool agent_choseProgram(Agent_t *agent) {
             //for k, v in required_global_env.items():
                 //if (self.colony.parentSwarm.global_env[k] < v):
             if (!isMultisetEnvIncluded(&agent->pcolony->pswarm.global_env, &required_global_env)) {
-                    printd(("required_global_env check failed"));
+                    printd(("required_global_env check failed for P%d", prg_nr));
                     executable = FALSE; // this program is not executable, check another program
                     continue;
             }
@@ -445,11 +462,12 @@ bool agent_choseProgram(Agent_t *agent) {
         //rand_value = random.randint(0, len(possiblePrograms) - 1)
         #ifndef KILOBOT
             //use rand() from stdlib.h
-            rand_value = (uint8_t) (( (float) rand() / RAND_MAX) * (chosen_prg_count - 1));
+            //rand_value in [0; chosen_prg_count-1] because the cast rounds to floor
+            rand_value = (uint8_t) (( (float) rand() / RAND_MAX) * (chosen_prg_count));
         #else
             //use rand_soft from kilolib.h
             //obtain random uint_8 in [0, chosen_prg_count-1] interval
-            rand_value = (uint8_t) (( (float) rand_soft() / 255) * (chosen_prg_count - 1));
+            rand_value = (uint8_t) (( (float) rand_soft() / 255) * (chosen_prg_count));
         #endif
         //self.chosenProgramNr = possiblePrograms[rand_value];
         agent->chosenProgramNr = aux[rand_value];
@@ -766,6 +784,15 @@ void initArray(uint8_t *array, uint8_t array_size, uint8_t default_value) {
 
 
 void initPcolony(Pcolony_t *pcol, uint8_t nr_A, uint8_t nr_agents, uint8_t n) {
+    //generate and set a seed for random number generation
+    //using methods specific to the platform
+    #ifndef KILOBOT
+        //on PC we use the time in seconds since the epoch as seed
+        srand(time(NULL));
+    #else
+        //on the kilobot we use the battery voltage as seed
+        rand_seed(rand_hard());
+    #endif
     pcol->nr_A = nr_A;
     pcol->nr_agents = nr_agents;
     pcol->n = n;

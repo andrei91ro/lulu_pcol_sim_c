@@ -159,6 +159,20 @@ void initMultisetEnv(multiset_env_t *multiset, uint8_t size);
 void initMultisetObj(multiset_obj_t *multiset, uint8_t size);
 
 /**
+ * @brief Clear an initialized multiset by setting all objects to NO_OBJECT and count 0
+ *
+ * @param multiset Pointer to the multiset that will be cleared
+ */
+void clearMultisetEnv(multiset_env_t *multiset);
+
+/**
+ * @brief Clear an initialized multiset by setting all objects to NO_OBJECT
+ *
+ * @param multiset Pointer to the multiset that will be cleared
+ */
+void clearMultisetObj(multiset_obj_t *multiset);
+
+/**
  * @brief Deallocate the space used by this environment multiset
  *
  * @param multiset Pointer to the multiset that will be destroyed
