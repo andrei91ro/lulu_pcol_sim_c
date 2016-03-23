@@ -1,6 +1,6 @@
 CC = gcc
 CC-AVR = avr-gcc
-DEBUG = 0
+DEBUG = 2 # release by default (no messages)
 
 # path to the LULU P colony simulator
 LULU_PCOL_SIM_PATH = /home/andrei/script_Python/lulu_pcol_sim
@@ -19,14 +19,14 @@ KILOLIB_HEADERS = ../kilolib
 # path to the Kilolib library -- only needed for AVR
 KILOLIB_LIB = $(KILOLIB_HEADERS)/build/kilolib.a
 
-ifeq ($(DEBUG),1)
-  #debug & testing flags
-  CFLAGS = -Wall -g -O0 -fbuiltin -c -DPCOL_SIM -DDEBUG_PRINT=0 -std=c99
-  BFLAGS = -Wall -g -O0 -fbuiltin -DPCOL_SIM -DDEBUG_PRINT=0
+ifeq ($(DEBUG), 2)
+	# release flags
+	CFLAGS = -Wall -g -O2 -c -DPCOL_SIM -std=c99
+	BFLAGS = -Wall -g -O2 -DPCOL_SIM
 else
-  # release flags
-  CFLAGS = -Wall -g -O2 -c -DPCOL_SIM -DDEBUG_PRINT=1 -std=c99
-  BFLAGS = -Wall -g -O2 -DPCOL_SIM -DDEBUG_PRINT=1
+	#debug & testing flags
+	CFLAGS = -Wall -g -O0 -fbuiltin -c -DPCOL_SIM -DDEBUG_PRINT=$(DEBUG) -std=c99
+	BFLAGS = -Wall -g -O0 -fbuiltin -DPCOL_SIM -DDEBUG_PRINT=$(DEBUG)
 endif
 
 # AVR flags are not included in the above conditional because we simulateneously build both debug and release versions of the AVR library
