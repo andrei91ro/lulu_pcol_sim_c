@@ -208,8 +208,9 @@ bool isMultisetEnvIncluded(multiset_env_t *parent, multiset_env_t *child) {
 
 bool isMultisetObjIncluded(multiset_obj_t *parent, multiset_obj_t *child) {
     for (uint8_t i = 0; i < child->size; i++)
-        // if child[i] object does not appear in parent multiset
-        if (!areObjectsInMultisetObj(parent, child->items[i], NO_OBJECT))
+        // if child[i] is not NO_OBJECT and
+        //  child[i] object does not appear in parent multiset
+        if (child->items[i] != NO_OBJECT && !areObjectsInMultisetObj(parent, child->items[i], NO_OBJECT))
             return FALSE;
 
     return TRUE;
@@ -263,6 +264,11 @@ bool agent_choseProgram(Agent_t *agent) {
         clearMultisetObj(&required_obj);
         clearMultisetEnv(&required_env);
         clearMultisetEnv(&required_global_env);
+
+        //if this program contains less rules than the P colony capacity, then the missing rules were e->e
+        //so it is safe to assume that we need one e object in required_obj for each missing rule
+        for (uint8_t i = 0; i < (agent->pcolony->n - agent->programs[prg_nr].nr_rules); i++)
+            setObjectCountFromMultisetObj(&required_obj, OBJECT_ID_E, COUNT_INCREMENT);
 
         for (uint8_t rule_nr = 0; rule_nr < agent->programs[prg_nr].nr_rules; rule_nr++) {
             rule = &agent->programs[prg_nr].rules[rule_nr];
