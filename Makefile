@@ -34,8 +34,8 @@ endif
 CFLAGS_AVR = -c -mmcu=atmega328p -Wall -gdwarf-2 -O3 -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -DF_CPU=8000000 -I$(KILOLIB_HEADERS) -DKILOBOT
 BFLAGS_AVR = -mmcu=atmega328p -Wall -gdwarf-2 -O3 -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -DF_CPU=8000000 -I$(KILOLIB_HEADERS) -DKILOBOT
 
-CFLAGS_DEBUG_AVR = $(CFLAGS_AVR) -DDEBUG_PRINT=0
-BFLAGS_DEBUG_AVR = $(BFLAGS_AVR) -DDEBUG_PRINT=0
+CFLAGS_DEBUG_AVR = $(CFLAGS_AVR) -DDEBUG_PRINT=0 -Wl,-u,vfprintf -lprintf_min
+BFLAGS_DEBUG_AVR = $(BFLAGS_AVR) -DDEBUG_PRINT=0 -Wl,-u,vfprintf -lprintf_min
 
 all: build/simulator build/lulu.a hex
 
