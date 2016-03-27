@@ -19,24 +19,24 @@
     #include <stdio.h>
 
     #if DEBUG_PRINT == 0
-        #define printd(fmt) printf("\nDEBUG: "); printf fmt
+        #define printd(fmt) puts("\nD: "); printf fmt
     #else
         #define printd(fmt)  do { } while(0)
     #endif
 
     #if DEBUG_PRINT <= 1
-        #define printi(fmt) printf("\nINFO: "); printf fmt
+        #define printi(fmt) puts("\nI: "); printf fmt
     #else
         #define printi(fmt)  do { } while(0)
     #endif
 
     #if DEBUG_PRINT <= 2
-        #define printw(fmt) printf("\nWARNING: "); printf fmt
+        #define printw(fmt) puts("\nW: "); printf fmt
     #else
         #define printw(fmt)  do { } while(0)
     #endif
 
-    #define printe(fmt) printf("\nERROR: "); printf fmt
+    #define printe(fmt) puts("\nE: "); printf fmt
 #endif
 
 #endif
