@@ -512,7 +512,6 @@ bool agent_executeProgram(Agent_t *agent) {
             if (!areObjectsInMultisetObj(&agent->obj, rule->lhs, NO_OBJECT)) {
                 // this is an error, there was a bug in choseProgram() that shouldn't have chosen this program
                 printe(("Object %d was required in the agent by rule %d but was not found", rule->lhs, rule_nr));
-                printe(("Please file a bug report regarding Pcolony.choseProgram()"));
                 return FALSE;
             }
             // remove one instance of rule.lhs from obj
@@ -540,7 +539,6 @@ bool agent_executeProgram(Agent_t *agent) {
                 if (!areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
                     printe(("Object %d was required in the environement by rule %d but was not found", rule->rhs, rule_nr));
-                    printe(("Please check your rules and try again"));
                     return FALSE;
                 }
                 // remove one instance of rule.rhs from env only if it is not 'e'
@@ -576,7 +574,6 @@ bool agent_executeProgram(Agent_t *agent) {
                 if (!areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
                     printe(("Object %d was required in the global swarm environement by rule %d but was not found", rule->rhs, rule_nr));
-                    printe(("Please check your rules and try again"));
                     return FALSE;
                 }
                 // remove one instance of rule.rhs from global swarm env only if it not 'e'
@@ -614,7 +611,6 @@ bool agent_executeProgram(Agent_t *agent) {
             if (!areObjectsInMultisetObj(&agent->obj, rule->alt_lhs, NO_OBJECT)) {
                 // this is an error, there was a bug in choseProgram() that shouldn't have chosen this program
                 printe(("Object %d was required in the agent by rule %d but was not found", rule->alt_lhs, rule_nr));
-                printe(("Please file a bug report regarding Pcolony.choseProgram()"));
                 return FALSE;
             }
             // remove one instance of rule.alt_lhs from obj
@@ -641,7 +637,6 @@ bool agent_executeProgram(Agent_t *agent) {
                 if (!areObjectsInMultisetEnv(&agent->pcolony->env, rule->alt_rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
                     printe(("Object %d was required in the environement by rule %d but was not found", rule->alt_rhs, rule_nr));
-                    printe(("Please check your rules and try again"));
                     return FALSE;
                 }
                 // remove one instance of rule.alt_rhs from env only if it not 'e'
@@ -677,7 +672,6 @@ bool agent_executeProgram(Agent_t *agent) {
                 if (!areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->alt_rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
                     printe(("Object %d was required in the global swarm environement by rule %d but was not found", rule->alt_rhs, rule_nr));
-                    printe(("Please check your rules and try again"));
                     return FALSE;
                 }
 
