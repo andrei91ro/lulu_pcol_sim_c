@@ -1,6 +1,7 @@
 CC = gcc
 CC-AVR = avr-gcc
-DEBUG = 2 # release by default (no messages)
+# release by default (no messages)
+DEBUG=2
 
 # path to the LULU P colony simulator
 LULU_PCOL_SIM_PATH = /home/andrei/script_Python/lulu_pcol_sim
@@ -11,7 +12,7 @@ LULU_C = /home/andrei/script_Python/lulu_c/lulu_c.py
 # path to one example instance file (can be set as an Environment variable to any Lulu formatted input file)
 # 3 robots in the swarm
 # 70 is the minimum kilo_uid
-LULU_INSTANCE_FILE = wild_pcol.lulu pi 3 70
+LULU_INSTANCE_FILE = test_disperse.lulu pi_disperse 60 1
 # path to the Kilombo headers
 KILOMBO_HEADERS = /usr/include
 # path to the Kilolib headers -- only needed for AVR
@@ -19,7 +20,7 @@ KILOLIB_HEADERS = ../kilolib
 # path to the Kilolib library -- only needed for AVR
 KILOLIB_LIB = $(KILOLIB_HEADERS)/build/kilolib.a
 
-ifeq ($(DEBUG), 2)
+ifeq ($(DEBUG),2)
 	# release flags
 	CFLAGS = -Wall -g -O2 -c -DPCOL_SIM -std=c99
 	BFLAGS = -Wall -g -O2 -DPCOL_SIM

@@ -41,11 +41,11 @@ char* printProgram(Program_t *program) {
             // x -> y / z -> w
             sprintf(outputBuffer, "%s %s%s%s / %s%s%s, ", outputBuffer,
                     objectNames[program->rules[i].lhs],
-                    ruleNames[lookupFirst[program->rules[i].type]],
+                    ruleNames[lookupFirst[program->rules[i].type - RULE_TYPE_CONDITIONAL_EVOLUTION_EVOLUTION]],
                     objectNames[program->rules[i].rhs],
                     // alternative fields
                     objectNames[program->rules[i].alt_lhs],
-                    ruleNames[lookupSecond[program->rules[i].type]],
+                    ruleNames[lookupSecond[program->rules[i].type - RULE_TYPE_CONDITIONAL_EVOLUTION_EVOLUTION]],
                     objectNames[program->rules[i].alt_rhs]);
     
     return outputBuffer;
