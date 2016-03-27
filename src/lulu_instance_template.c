@@ -6,6 +6,10 @@
     char* agentNames[] = {[AGENT_MOTION] = "motion"};
 #endif
 
+#ifdef NEEDING_WILDCARD_EXPANSION
+    #include "wild_expand.h"
+#endif
+
 //the smallest kilo_uid from the swarm
 const uint8_t smallest_robot_uid = 70;
 //the number of robots that make up the swarm
@@ -64,26 +68,28 @@ void lulu_destroy(Pcolony_t *pcol) {
     #endif
 }
 
-uint8_t expand_pcolony(Pcolony_t *pcol, uint8_t my_id) {
-    uint8_t obj_with_id[] = {OBJECT_ID_B_$id, OBJECT_ID_S_$id, OBJECT_ID_ID_$id};
-    uint8_t obj_with_id_size = 3;
+#ifdef NEEDING_WILDCARD_EXPANSION
+    uint8_t expand_pcolony(Pcolony_t *pcol, uint8_t my_id) {
+        uint8_t obj_with_id[] = {OBJECT_ID_B_$id, OBJECT_ID_S_$id, OBJECT_ID_ID_$id};
+        uint8_t obj_with_id_size = 3;
 
-    uint8_t obj_with_any[] = {OBJECT_ID_B_$};
-    //is the $ object followed by a $ID object in the alphabet
-    // 0 means that in the alphabet we have B_$, B_0 B_1, B_2, ...
-    // 1 means that in the alphabet we have B_$, B_$ID, B_0 B_1, B_2, ...
-    uint8_t is_obj_with_any_followed_by_id[] = {0};
-    uint8_t obj_with_any_size = 1; //applies to both obj_with_any[] and is_obj_with_any_followed_by_id[]
+        uint8_t obj_with_any[] = {OBJECT_ID_B_$};
+        //is the $ object followed by a $ID object in the alphabet
+        // 0 means that in the alphabet we have B_$, B_0 B_1, B_2, ...
+        // 1 means that in the alphabet we have B_$, B_$ID, B_0 B_1, B_2, ...
+        uint8_t is_obj_with_any_followed_by_id[] = {0};
+        uint8_t obj_with_any_size = 1; //applies to both obj_with_any[] and is_obj_with_any_followed_by_id[]
 
-    uint8_t my_symbolic_id = my_id - smallest_robot_uid;
+        uint8_t my_symbolic_id = my_id - smallest_robot_uid;
 
-    //replace $ID wildcarded objects with the object corresponding to the symbolic id
-    //  e.g.: B_$ID -> B_0 for my_symbolic_id = 0
-    replacePcolonyWildID(pcol, obj_with_id, obj_with_id_size, my_symbolic_id);
+        //replace $ID wildcarded objects with the object corresponding to the symbolic id
+        //  e.g.: B_$ID -> B_0 for my_symbolic_id = 0
+        replacePcolonyWildID(pcol, obj_with_id, obj_with_id_size, my_symbolic_id);
 
-    //expand each obj_with_any[] element into nr_swarm_robots objects except my_symbolic id.
-    //  e.g.: B_$ -> B_0, B_2 for nr_swarm_robots = 3 and my_symbolic_id = 1
-    expandPcolonyWildAny(pcol, obj_with_any, is_obj_with_any_followed_by_id, obj_with_any_size, my_symbolic_id, nr_swarm_robots);
+        //expand each obj_with_any[] element into nr_swarm_robots objects except my_symbolic id.
+        //  e.g.: B_$ -> B_0, B_2 for nr_swarm_robots = 3 and my_symbolic_id = 1
+        expandPcolonyWildAny(pcol, obj_with_any, is_obj_with_any_followed_by_id, obj_with_any_size, my_symbolic_id, nr_swarm_robots);
 
-    return my_symbolic_id;
-}
+        return my_symbolic_id;
+    }
+#endif

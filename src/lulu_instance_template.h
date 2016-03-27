@@ -71,14 +71,16 @@ void lulu_init(Pcolony_t *pcol);
  */
 void lulu_destroy(Pcolony_t *pcol);
 
-/**
- * @brief Expands and replaces wildcarded objects with the appropriate objects
- * Objects that end with _$ID are replaced with _i where i is the the id of the robot, provided with my_id parameter
- *
- * @param pcol The pcolony where the replacements will take place
- * @param my_id The kilo_uid of the robot
- * @return The symbolic id that corresponds to this robot (my_id - smallest_robot_uid)
- */
-uint8_t expand_pcolony(Pcolony_t *pcol, uint8_t my_id);
+#ifdef NEEDING_WILDCARD_EXPANSION
+    /**
+     * @brief Expands and replaces wildcarded objects with the appropriate objects
+     * Objects that end with _$ID are replaced with _i where i is the the id of the robot, provided with my_id parameter
+     *
+     * @param pcol The pcolony where the replacements will take place
+     * @param my_id The kilo_uid of the robot
+     * @return The symbolic id that corresponds to this robot (my_id - smallest_robot_uid)
+     */
+    uint8_t expand_pcolony(Pcolony_t *pcol, uint8_t my_id);
+#endif
 
 #endif

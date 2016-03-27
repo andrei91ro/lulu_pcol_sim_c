@@ -74,9 +74,11 @@ int main(int argc, char **argv) {
     printi(("Initial configuration:"));
     printColonyState(&pcol, TRUE);
 
+#ifdef NEEDING_WILDCARD_EXPANSION
     expand_pcolony(&pcol, 71);
     printi(("Configuration after wildcard expansion:"));
     printColonyState(&pcol, TRUE);
+#endif
 
     while (1) {
         sim_step_result_t result = SIM_STEP_RESULT_FINISHED;
