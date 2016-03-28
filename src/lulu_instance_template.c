@@ -1,7 +1,10 @@
 #include "lulu_instance_template.h"
-#include <stdlib.h>
+
+#ifdef NEEDING_WILDCARD_EXPANSION
+    #include "wild_expand.h"
+#endif
+
 #ifdef PCOL_SIM
-    #include <string.h>
     char* objectNames[] = {[NO_OBJECT] = "no_object", [OBJECT_ID_L_M] = "l_m", [OBJECT_ID_L_P] = "l_p",[OBJECT_ID_L_Z] = "l_z", [OBJECT_ID_E] = "e", [OBJECT_ID_F] = "f"};
     char* agentNames[] = {[AGENT_MOTION] = "motion"};
 #endif

@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     printColonyState(&pcol, TRUE);
 
 #ifdef NEEDING_WILDCARD_EXPANSION
-    expand_pcolony(&pcol, 71);
+    expand_pcolony(&pcol, 0);
     printi(("Configuration after wildcard expansion:"));
     printColonyState(&pcol, TRUE);
 #endif
