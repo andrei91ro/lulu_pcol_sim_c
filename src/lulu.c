@@ -465,12 +465,12 @@ bool agent_choseProgram(Agent_t *agent) {
         //rand_value = random.randint(0, len(possiblePrograms) - 1)
         #ifndef KILOBOT
             //use rand() from stdlib.h
-            //rand_value in [0; chosen_prg_count-1] because the cast rounds to floor
-            rand_value = (uint8_t) (( (float) rand() / RAND_MAX) * (chosen_prg_count));
+            //rand_value in [0; chosen_prg_count-1] interval
+            rand_value = rand() % chosen_prg_count;
         #else
             //use rand_soft from kilolib.h
-            //obtain random uint_8 in [0, chosen_prg_count-1] interval
-            rand_value = (uint8_t) (( (float) rand_soft() / 255) * (chosen_prg_count));
+            //rand_value in [0; chosen_prg_count-1] interval
+            rand_value = rand_soft() % chosen_prg_count;
         #endif
         //self.chosenProgramNr = possiblePrograms[rand_value];
         agent->chosenProgramNr = aux[rand_value];
