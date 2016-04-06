@@ -56,7 +56,7 @@ void printColonyState(Pcolony_t *pcol, bool with_programs) {
     printf("\n    Pcolony.env = [%s]", printMultisetEnv(&pcol->env));
     printf("\n    Pswarm.env = [%s]", printMultisetEnv(&pcol->pswarm.global_env));
     for (uint8_t i = 0; i < pcol->nr_agents; i++) {
-        printf("\n    %s.obj = [%s]", agentNames[i], printMultisetObj(&pcol->agents[i].obj));
+        printf("\n    %s.obj = [%s]; nr_programs = %d", agentNames[i], printMultisetObj(&pcol->agents[i].obj), pcol->agents[i].nr_programs);
         if (with_programs)
             for (uint8_t prg_nr = 0; prg_nr < pcol->agents[i].nr_programs; prg_nr++)
                 printf("\n        P%d = < %s >", prg_nr, printProgram(&pcol->agents[i].programs[prg_nr]));
@@ -75,8 +75,8 @@ int main(int argc, char **argv) {
     printColonyState(&pcol, TRUE);
 
 #ifdef NEEDING_WILDCARD_EXPANSION
-    expand_pcolony(&pcol, 0);
     printi(("Configuration after wildcard expansion:"));
+    expand_pcolony(&pcol, 0);
     printColonyState(&pcol, TRUE);
 #endif
 
