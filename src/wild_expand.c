@@ -84,28 +84,40 @@ void replacePcolonyWildID(Pcolony_t *pcol, uint8_t obj_with_id[], uint8_t obj_wi
 void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_obj_with_any_followed_by_id[], uint8_t obj_with_any_size, uint8_t my_symbolic_id, uint8_t nr_swarm_robots) {
     for (uint8_t any_id = 0; any_id < obj_with_any_size; any_id++) {
         //if for e.g B_$ exists in the environment, then replace it with the expansion
-        if (areObjectsInMultisetEnv(&pcol->env, obj_with_any[any_id], NO_OBJECT))
+        if (areObjectsInMultisetEnv(&pcol->env, obj_with_any[any_id], NO_OBJECT)) {
             for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
                 if (robot_id != my_symbolic_id)
                     setObjectCountFromMultisetEnv(&pcol->env,
                             obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id,
                             COUNT_INCREMENT);
 
+            //now that we replaced this wildcarded object with it's expansions, we can remove it from this multiset
+            setObjectCountFromMultisetEnv(&pcol->env, obj_with_any[any_id], 0);
+        }
+
         //if for e.g B_$ exists in the global swarm environment, then replace it with the expansion
-        if (areObjectsInMultisetEnv(&pcol->pswarm.global_env, obj_with_any[any_id], NO_OBJECT))
+        if (areObjectsInMultisetEnv(&pcol->pswarm.global_env, obj_with_any[any_id], NO_OBJECT)) {
             for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
                 if (robot_id != my_symbolic_id)
                     setObjectCountFromMultisetEnv(&pcol->pswarm.global_env,
                             obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id,
                             COUNT_INCREMENT);
 
+            //now that we replaced this wildcarded object with it's expansions, we can remove it from this multiset
+            setObjectCountFromMultisetEnv(&pcol->pswarm.global_env, obj_with_any[any_id], 0);
+        }
+
         for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
             //if for e.g B_$ exists in this agent's obj, then replace it with the expansion
-            if (areObjectsInMultisetObj(&pcol->agents[agent_nr].obj, obj_with_any[any_id], NO_OBJECT))
+            if (areObjectsInMultisetObj(&pcol->agents[agent_nr].obj, obj_with_any[any_id], NO_OBJECT)) {
+                //we remove this wildcarded object from the multiset to free up space for the generated objects (as multisetObj is of limited capacity)
+                setObjectCountFromMultisetObj(&pcol->agents[agent_nr].obj, obj_with_any[any_id], 0);
                 for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
                     setObjectCountFromMultisetObj(&pcol->agents[agent_nr].obj,
                             obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id,
                             COUNT_INCREMENT);
+
+            }
         }
     }
 
@@ -113,54 +125,51 @@ void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_ob
     for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
         //if all programs have been initialised (init_program_nr == nr_programs), then there is no need for wildcard any $ expansion
         if (pcol->agents[agent_nr].init_program_nr != pcol->agents[agent_nr].nr_programs) {
-            uint8_t expanded_programs = 0, was_program_expanded = 0;
+            uint8_t nr_expanded_programs = 0;
 
             for (uint8_t program_nr = 0; program_nr < pcol->agents[agent_nr].nr_programs; program_nr++) {
-                was_program_expanded = 0;
 
-                for (uint8_t any_id = 0; any_id < obj_with_any_size; any_id++) {
-                    //if wild_position > 0 then this wildcard object exists within the rules of the program
-                    if (isObjectInProgram(&pcol->agents[agent_nr].programs[program_nr], obj_with_any[any_id])) {
-                        for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
-                            if (robot_id != my_symbolic_id) {
-                                //create a copy of the current program and place it at the end of the initialized program list for this agent
-                                copyProgram(&pcol->agents[agent_nr].programs[pcol->agents[agent_nr].init_program_nr],
-                                        &pcol->agents[agent_nr].programs[program_nr]);
+                if (isWildcardAnyInProgram(&pcol->agents[agent_nr].programs[program_nr], obj_with_any, obj_with_any_size)) {
+                    for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
+                        if (robot_id != my_symbolic_id) {
+                            //create a copy of the current program and place it at the end of the initialized program list for this agent
+                            copyProgram(&pcol->agents[agent_nr].programs[pcol->agents[agent_nr].init_program_nr],
+                                    &pcol->agents[agent_nr].programs[program_nr]);
 
-                                //replace any occurence of the $ wildcard in any rule of the program with the current robot_id value, for e.g. B_0, B_1, ...
-                                replaceObjInProgram(&pcol->agents[agent_nr].programs[pcol->agents[agent_nr].init_program_nr],
-                                        obj_with_any[any_id],
-                                        obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id);
+                            for (uint8_t any_id = 0; any_id < obj_with_any_size; any_id++)
+                                //if wild_position > 0 then this wildcard object exists within the rules of the program
+                                if (isObjectInProgram(&pcol->agents[agent_nr].programs[program_nr], obj_with_any[any_id]))
+                                    //replace any occurence of the $ wildcard in any rule of the program with the current robot_id value, for e.g. B_0, B_1, ...
+                                    replaceObjInProgram(&pcol->agents[agent_nr].programs[pcol->agents[agent_nr].init_program_nr],
+                                            obj_with_any[any_id],
+                                            obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id);
 
-                                //another program has been initialized
-                                pcol->agents[agent_nr].init_program_nr++;
-                            }
+                            //another program has been initialized
+                            pcol->agents[agent_nr].init_program_nr++;
+                        }
+                    //keep track of the number of expanded programs so far
+                    nr_expanded_programs++;
 
-                        //count this expanded program
-                        expanded_programs++;
-                        was_program_expanded = 1;
-                    }
-
-                    //construct a new program list for this agent that does not constain empty (no rules) programs - programs that were originally
-                    //wildcard-any programs and were expanded and afterwards deleted
-                    //Program_t *new_programs = (Program_t *) malloc(sizeof(Program_t) * (pcol->agents[agent_nr].nr_programs - expanded_programs));
-                    //uint8_t current_pos = 0;
-                    //for (uint8_t i = 0; i < pcol->agents[agent_nr].nr_programs; i++)
-                        //if (pcol->agents[agent_nr].programs[i].nr_rules > 0) {
-                            //copyProgram(&new_programs[current_pos++], &pcol->agents[agent_nr].programs[i]);
-                            //destroyProgram(&pcol->agents[agent_nr].programs[i]);
-                        //}
-                    ////remove the old list
-                    //free(pcol->agents[agent_nr].programs);
-                    ////assign the new list (will be cleared by destroyAgent() just as the original list)
-                    //pcol->agents[agent_nr].programs = new_programs;
-                    ////we removed the wildcard any programs
-                    //pcol->agents[agent_nr].nr_programs -= expanded_programs;
-                }
-
-                if (was_program_expanded)
                     //we finished expanding this wildcarded program, so remove this program
                     destroyProgram(&pcol->agents[agent_nr].programs[program_nr]);
+                }
+            }
+            if (nr_expanded_programs > 0) {
+                //construct a new program list for this agent that does not contain empty (no rules) programs - programs that were originally
+                //wildcard-any programs and were expanded and afterwards deleted
+                Program_t *new_programs = (Program_t *) malloc(sizeof(Program_t) * (pcol->agents[agent_nr].nr_programs - nr_expanded_programs));
+                uint8_t current_pos = 0;
+                for (uint8_t i = 0; i < pcol->agents[agent_nr].nr_programs; i++)
+                    if (pcol->agents[agent_nr].programs[i].nr_rules > 0) {
+                        copyProgram(&new_programs[current_pos++], &pcol->agents[agent_nr].programs[i]);
+                        destroyProgram(&pcol->agents[agent_nr].programs[i]);
+                    }
+                //remove the old list
+                free(pcol->agents[agent_nr].programs);
+                //assign the new list (will be cleared by destroyAgent() just as the original list)
+                pcol->agents[agent_nr].programs = new_programs;
+                //we removed the wildcard any programs
+                pcol->agents[agent_nr].nr_programs -= nr_expanded_programs;
             }
         }
     }
