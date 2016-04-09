@@ -324,8 +324,8 @@ bool agent_choseProgram(Agent_t *agent) {
                 //   or the first rule is of exteroceptive type and the right hand side object is not in the global environement
                 //if ( (rule->type == RuleType.communication and rule.rhs not in self.colony.env)
                 //  or (rule.type == RuleType.exteroceptive and rule.rhs not in self.colony.parentSwarm.global_env)
-                if ( (rule->type == RULE_TYPE_COMMUNICATION && !areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT))
-                  || (rule->type == RULE_TYPE_EXTEROCEPTIVE && !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) ) {
+                if ( (getFirstRuleTypeFromConditional(rule->type) == RULE_TYPE_COMMUNICATION && !areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT))
+                  || (getFirstRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE && !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) ) {
                     // the first rule cannot be executed so we check the second rule
 
                     // if the second rule is of communication type then the right hand side object has to be in the environement
