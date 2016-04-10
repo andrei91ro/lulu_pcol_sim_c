@@ -14,9 +14,9 @@
 #endif
 
 //the smallest kilo_uid from the swarm
-const uint8_t smallest_robot_uid = 70;
+const uint16_t smallest_robot_uid = 70;
 //the number of robots that make up the swarm
-const uint8_t nr_swarm_robots = 3;
+const uint16_t nr_swarm_robots = 3;
 
 void lulu_init(Pcolony_t *pcol) {
     //init Pcolony with alphabet size = 4, nr of agents = 2, capacity = 2
@@ -59,20 +59,10 @@ void lulu_init(Pcolony_t *pcol) {
 void lulu_destroy(Pcolony_t *pcol) {
     //destroys all of the subcomponents
     destroyPcolony(pcol);
-    #ifdef PCOL_SIM
-        // objectNames_size = alphabet_size = 4
-        for (uint8_t i = 0; i < 4; i++)
-            free(objectNames[i]);
-        free(objectNames);
-        //agentNames_size == nr of agents = 2
-        for (uint8_t i = 0; i < 2; i++)
-            free(agentNames[i]);
-        free(agentNames);
-    #endif
 }
 
 #ifdef NEEDING_WILDCARD_EXPANSION
-    uint8_t expand_pcolony(Pcolony_t *pcol, uint8_t my_id) {
+    uint16_t expand_pcolony(Pcolony_t *pcol, uint16_t my_id) {
         uint8_t obj_with_id[] = {OBJECT_ID_B_$id, OBJECT_ID_S_$id, OBJECT_ID_ID_$id};
         uint8_t obj_with_id_size = 3;
 
@@ -83,7 +73,11 @@ void lulu_destroy(Pcolony_t *pcol) {
         uint8_t is_obj_with_any_followed_by_id[] = {0};
         uint8_t obj_with_any_size = 1; //applies to both obj_with_any[] and is_obj_with_any_followed_by_id[]
 
-        uint8_t my_symbolic_id = my_id - smallest_robot_uid;
+        uint16_t my_symbolic_id = my_id - smallest_robot_uid;
+
+        //do not expand the P colonies of robots that have a symbolic_id > nr_swarm_robots initially declared
+        if (my_symbolic_id >= nr_swarm_robots)
+            return my_symbolic_id;
 
         //replace $ID wildcarded objects with the object corresponding to the symbolic id
         //  e.g.: B_$ID -> B_0 for my_symbolic_id = 0

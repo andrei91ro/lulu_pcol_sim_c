@@ -50,12 +50,12 @@ enum agents {
 /**
  * @brief The smallest kilo_uid from the swarm (is set in instance.c by lulu_c.py)
  */
-extern const uint8_t smallest_robot_uid;
+extern const uint16_t smallest_robot_uid;
 
 /**
  * @brief The number of robots that make up the swarm (is set in instance.c by lulu_c.py)
  */
-extern const uint8_t nr_swarm_robots;
+extern const uint16_t nr_swarm_robots;
 
 /**
  * @brief Initialises the pcol object and all of it's components
@@ -80,7 +80,7 @@ void lulu_destroy(Pcolony_t *pcol);
      * @param my_id The kilo_uid of the robot
      * @return The symbolic id that corresponds to this robot (my_id - smallest_robot_uid)
      */
-    uint8_t expand_pcolony(Pcolony_t *pcol, uint8_t my_id);
+    uint16_t expand_pcolony(Pcolony_t *pcol, uint16_t my_id);
 #endif
 
 #endif
