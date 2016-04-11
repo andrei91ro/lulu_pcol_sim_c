@@ -65,14 +65,14 @@ void replacePcolonyWildID(Pcolony_t *pcol, uint8_t obj_with_id[], uint8_t obj_wi
     Agent_t *agent;
 
     for (uint8_t i = 0; i < obj_with_id_size; i++) {
-        //OBJECT_ID_B_$id is followed by OBJECT_ID_B_0
+        //OBJECT_ID_B_W_ID is followed by OBJECT_ID_B_0
         replaceObjInMultisetEnv(&pcol->env, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
         replaceObjInMultisetEnv(&pcol->pswarm.global_env, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
 
         for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
             agent = &pcol->agents[agent_nr];
-            //replace $id in each agent's obj
-            //OBJECT_ID_B_$id is followed by OBJECT_ID_B_0
+            //replace W_ID in each agent's obj
+            //OBJECT_ID_B_W_ID is followed by OBJECT_ID_B_0
             replaceObjInMultisetObj(&agent->obj, obj_with_id[i], obj_with_id[i] + 1 + my_symbolic_id);
 
             for (uint8_t program_nr = 0; program_nr < agent->nr_programs; program_nr++)
@@ -83,7 +83,7 @@ void replacePcolonyWildID(Pcolony_t *pcol, uint8_t obj_with_id[], uint8_t obj_wi
 
 void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_obj_with_any_followed_by_id[], uint8_t obj_with_any_size, uint8_t my_symbolic_id, uint8_t nr_swarm_robots) {
     for (uint8_t any_id = 0; any_id < obj_with_any_size; any_id++) {
-        //if for e.g B_$ exists in the environment, then replace it with the expansion
+        //if for e.g B_W_ALL exists in the environment, then replace it with the expansion
         if (areObjectsInMultisetEnv(&pcol->env, obj_with_any[any_id], NO_OBJECT)) {
             for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
                 if (robot_id != my_symbolic_id)
@@ -95,7 +95,7 @@ void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_ob
             setObjectCountFromMultisetEnv(&pcol->env, obj_with_any[any_id], 0);
         }
 
-        //if for e.g B_$ exists in the global swarm environment, then replace it with the expansion
+        //if for e.g B_W_ALL exists in the global swarm environment, then replace it with the expansion
         if (areObjectsInMultisetEnv(&pcol->pswarm.global_env, obj_with_any[any_id], NO_OBJECT)) {
             for (uint8_t robot_id = 0; robot_id < nr_swarm_robots; robot_id++)
                 if (robot_id != my_symbolic_id)
@@ -108,7 +108,7 @@ void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_ob
         }
 
         for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
-            //if for e.g B_$ exists in this agent's obj, then replace it with the expansion
+            //if for e.g B_W_ALL exists in this agent's obj, then replace it with the expansion
             if (areObjectsInMultisetObj(&pcol->agents[agent_nr].obj, obj_with_any[any_id], NO_OBJECT)) {
                 //we remove this wildcarded object from the multiset to free up space for the generated objects (as multisetObj is of limited capacity)
                 setObjectCountFromMultisetObj(&pcol->agents[agent_nr].obj, obj_with_any[any_id], 0);
@@ -123,7 +123,7 @@ void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_ob
 
     // begin program expansion
     for (uint8_t agent_nr = 0; agent_nr < pcol->nr_agents; agent_nr++) {
-        //if all programs have been initialised (init_program_nr == nr_programs), then there is no need for wildcard any $ expansion
+        //if all programs have been initialised (init_program_nr == nr_programs), then there is no need for wildcard any W_ALL expansion
         if (pcol->agents[agent_nr].init_program_nr != pcol->agents[agent_nr].nr_programs) {
             uint8_t nr_expanded_programs = 0;
 
@@ -139,7 +139,7 @@ void expandPcolonyWildAny(Pcolony_t *pcol, uint8_t obj_with_any[], uint8_t is_ob
                             for (uint8_t any_id = 0; any_id < obj_with_any_size; any_id++)
                                 //if wild_position > 0 then this wildcard object exists within the rules of the program
                                 if (isObjectInProgram(&pcol->agents[agent_nr].programs[program_nr], obj_with_any[any_id]))
-                                    //replace any occurence of the $ wildcard in any rule of the program with the current robot_id value, for e.g. B_0, B_1, ...
+                                    //replace any occurence of the W_ALL wildcard in any rule of the program with the current robot_id value, for e.g. B_0, B_1, ...
                                     replaceObjInProgram(&pcol->agents[agent_nr].programs[pcol->agents[agent_nr].init_program_nr],
                                             obj_with_any[any_id],
                                             obj_with_any[any_id] + is_obj_with_any_followed_by_id[any_id] + 1 + robot_id);

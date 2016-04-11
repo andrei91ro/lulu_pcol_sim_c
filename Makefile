@@ -97,7 +97,7 @@ src/instance.h src/instance.c:
 hex: build_hex/lulu.a build_hex/lulu_debug.a
 
 # WITH_EXPAND specifies whether we include wild_expand.o in lulu.a
-build_hex/lulu.a: build_hex/lulu.o build_hex/rules.o $(WITH_EXPAND)
+build_hex/lulu.a: build_hex/lulu.o build_hex/rules.o $(WITH_EXPAND_AVR)
 	ar rcs $@ $^
 
 # WITH_EXPAND specifies whether we include wild_expand.o in lulu_debug.a

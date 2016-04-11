@@ -41,25 +41,25 @@ uint8_t isObjectInProgram(Program_t *program, uint8_t obj);
 uint8_t isObjectInRule(Rule_t *rule, uint8_t obj);
 
 /**
- * @brief Replaces the $ID wildcard object into the object corresponding to the symbolic id, in all structures of the Pcolony
- * E.g for obj_with_id[OBJECT_ID_B_$ID] and my_symbolic_id = 2 then OBJECT_ID_B_$ID -> OBJECT_ID_B_2 in Pcolony.env,
+ * @brief Replaces the W_ID wildcard object into the object corresponding to the symbolic id, in all structures of the Pcolony
+ * E.g for obj_with_id[OBJECT_ID_B_W_ID] and my_symbolic_id = 2 then OBJECT_ID_B_W_ID -> OBJECT_ID_B_2 in Pcolony.env,
  * Pswarm.global_env, any Agent.obj and in any rule that contains the wildcarded object
  *
  * @param pcol The Pcolony where the replacement takes place
- * @param obj_with_id[] The array of objects that contain the $ID wildcard
+ * @param obj_with_id[] The array of objects that contain the W_ID wildcard
  * @param obj_with_id_size The size (number of elements) in the obj_with_id array
  * @param my_symbolic_id The computed symbolic id of this robot
  */
 void replacePcolonyWildID(Pcolony_t *pcol, uint8_t obj_with_id[], uint8_t obj_with_id_size, uint8_t my_symbolic_id);
 
 /**
- * @brief Expands the $ wildcard object into all of the objects (0 -> nr_swarm_robots) except my_symbolic_id in all of the structures of the Pcolony
- * E.g for obj_with_any[OBJECT_ID_B_$] and nr_swarm_robots = 3 then OBJECT_ID_B_$ -> [OBJECT_ID_B_0, OBJECT_ID_B_1, OBJECT_ID_B_2]
+ * @brief Expands the W_ALL wildcard object into all of the objects (0 -> nr_swarm_robots) except my_symbolic_id in all of the structures of the Pcolony
+ * E.g for obj_with_any[OBJECT_ID_B_W_ALL] and nr_swarm_robots = 3 then OBJECT_ID_B_W_ALL -> [OBJECT_ID_B_0, OBJECT_ID_B_1, OBJECT_ID_B_2]
  * in Pcolony.env, Pswarm.global_env, any Agent.obj and in any rule that contains the wildcarded object
  *
  * @param pcol The Pcolony where the expansion takes place
- * @param obj_with_any[] The array of objects that contain the $ wildcard
- * @param is_obj_with_any_followed_by_id[] An array that specifies (with 0 / 1) whether each element in obj_with_any[] is or not followed by and $ID object
+ * @param obj_with_any[] The array of objects that contain the W_ALL wildcard
+ * @param is_obj_with_any_followed_by_id[] An array that specifies (with 0 / 1) whether each element in obj_with_any[] is or not followed by and W_ID object
  * @param obj_with_any_size The size (number of elements) in the obj_with_any array (applies to is_obj_with_any_followed_by_id[])
  * @param my_symbolic_id The computed symbolic id of this robot
  * @param nr_swarm_robots The total number of swarm robots. This number is used for the actual expansion (0 .. nr_swarm_robots - 1)
