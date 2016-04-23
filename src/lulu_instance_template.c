@@ -37,6 +37,16 @@ void lulu_init(Pcolony_t *pcol) {
         pcol->pswarm.global_env.items[0].nr = 2;
     //end init global pswarm environment
 
+    //init INPUT global pswarm environment
+        pcol->pswarm.in_global_env.items[0].id = OBJECT_ID_E;
+        pcol->pswarm.in_global_env.items[0].nr = 2;
+    //end init global pswarm environment
+
+    //init OUTPUT global pswarm environment
+        pcol->pswarm.out_global_env.items[0].id = OBJECT_ID_E;
+        pcol->pswarm.out_global_env.items[0].nr = 2;
+    //end init global pswarm environment
+
     //init agent command
     initAgent(&pcol->agents[AGENT_COMMAND], pcol, 2);
         //init obj multiset
