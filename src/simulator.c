@@ -93,10 +93,12 @@ int main(int argc, char **argv) {
 
         if (result == SIM_STEP_RESULT_NO_MORE_EXECUTABLES) {
             printi(("Simulation finished sucesfully"));
+            lulu_destroy(&pcol);
             return 0;
         }
         else if (result == SIM_STEP_RESULT_ERROR) {
             printe(("Error encountered"));
+            lulu_destroy(&pcol);
             return 1;
         }
 
