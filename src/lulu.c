@@ -213,7 +213,8 @@ bool isMultisetObjIncluded(multiset_obj_t *parent, multiset_obj_t *child) {
     for (uint8_t i = 0; i < child->size; i++)
         // if child[i] is not NO_OBJECT and
         //  child[i] object does not appear in parent multiset
-        if (child->items[i] != NO_OBJECT && !areObjectsInMultisetObj(parent, child->items[i], NO_OBJECT))
+        if (child->items[i] != NO_OBJECT &&
+                getObjectCountFromMultisetObj(parent, child->items[i]) < getObjectCountFromMultisetObj(child, child->items[i]))
             return FALSE;
 
     return TRUE;
