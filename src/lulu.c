@@ -390,7 +390,7 @@ bool agent_choseProgram(Agent_t *agent) {
             //for k, v in required_obj.items():
                 //if (self.obj[k] < v):
             if (!isMultisetObjIncluded(&agent->obj, &required_obj)) {
-                    printd(("req_obj fail P%d", prg_nr));
+                    printd("req_obj fail P%d", prg_nr);
                     executable = FALSE; // this program is not executable, check another program
                     continue;
             }
@@ -404,7 +404,7 @@ bool agent_choseProgram(Agent_t *agent) {
             //for k, v in required_env.items():
                 //if (self.colony.env[k] < v):
             if (!isMultisetEnvIncluded(&agent->pcolony->env, &required_env)) {
-                    printd(("req_env fail P%d", prg_nr));
+                    printd("req_env fail P%d", prg_nr);
                     executable = FALSE; // this program is not executable, check another program
                     continue;
             }
@@ -418,7 +418,7 @@ bool agent_choseProgram(Agent_t *agent) {
             //for k, v in required_global_env.items():
                 //if (self.colony.parentSwarm.global_env[k] < v):
             if (!isMultisetEnvIncluded(&agent->pcolony->pswarm.global_env, &required_global_env)) {
-                    printd(("req_global_env fail P%d", prg_nr));
+                    printd("req_global_env fail P%d", prg_nr);
                     executable = FALSE; // this program is not executable, check another program
                     continue;
             }
@@ -439,7 +439,7 @@ bool agent_choseProgram(Agent_t *agent) {
     if (chosen_prg_count == 1) {
         //self.chosenProgramNr = possiblePrograms[0];
         agent->chosenProgramNr = last_chosen_prg_nr;
-        printd(("chosen_prg=%d", agent->chosenProgramNr));
+        printd("chosen_prg=%d", agent->chosenProgramNr);
 
         //release dinamically allocated variables
         destroyMultisetObj(&required_obj);
@@ -455,11 +455,11 @@ bool agent_choseProgram(Agent_t *agent) {
         uint8_t aux[chosen_prg_count];
         uint8_t c = 0, rand_value = 0;
 
-        printd(("possiblePrgs(nr=%d)=", chosen_prg_count));
+        printd("possiblePrgs(nr=%d)=", chosen_prg_count);
         for (int p = 0; p < agent->nr_programs; p++)
             // if program p was previously marked as executable
             if (possiblePrograms[p]) {
-                printd(("  %d", p));
+                printd("  %d", p);
                 aux[c++] = p; //store the program number in the aux array
             }
 
@@ -475,7 +475,7 @@ bool agent_choseProgram(Agent_t *agent) {
         #endif
         //self.chosenProgramNr = possiblePrograms[rand_value];
         agent->chosenProgramNr = aux[rand_value];
-        printd(("rand_chosen_prg=%d", agent->chosenProgramNr));
+        printd("rand_chosen_prg=%d", agent->chosenProgramNr);
 
         //release dinamically allocated variables
         destroyMultisetObj(&required_obj);
@@ -486,7 +486,7 @@ bool agent_choseProgram(Agent_t *agent) {
     }
 
     agent->chosenProgramNr = -1; // no program can be executed
-    printd(("no exec prg"));
+    printd("no exec prg");
 
     //release dinamically allocated variables
     destroyMultisetObj(&required_obj);
@@ -515,7 +515,7 @@ bool agent_executeProgram(Agent_t *agent) {
             //if (getObjectCountFromMultiset(&agent->obj, rule->lhs))
             if (!areObjectsInMultisetObj(&agent->obj, rule->lhs, NO_OBJECT)) {
                 // this is an error, there was a bug in choseProgram() that shouldn't have chosen this program
-                printe((execErrMsgs[0], rule->lhs, rule_nr));
+                printe(execErrMsgs[0], rule->lhs, rule_nr);
                 return FALSE;
             }
             // remove one instance of rule.lhs from obj
@@ -542,7 +542,7 @@ bool agent_executeProgram(Agent_t *agent) {
                 //if (self.colony.env[rule.rhs] <= 0):
                 if (!areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
-                    printe((execErrMsgs[1], rule->rhs, rule_nr));
+                    printe(execErrMsgs[1], rule->rhs, rule_nr);
                     return FALSE;
                 }
                 // remove one instance of rule.rhs from env only if it is not 'e'
@@ -577,7 +577,7 @@ bool agent_executeProgram(Agent_t *agent) {
                 //if (self.colony.parentSwarm.global_env[rule.rhs] <= 0):
                 if (!areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
-                    printe((execErrMsgs[2], rule->rhs, rule_nr));
+                    printe(execErrMsgs[2], rule->rhs, rule_nr);
                     return FALSE;
                 }
                 // remove one instance of rule.rhs from global swarm env only if it not 'e'
@@ -614,7 +614,7 @@ bool agent_executeProgram(Agent_t *agent) {
             //if (self.obj[rule.alt_lhs] <= 0):
             if (!areObjectsInMultisetObj(&agent->obj, rule->alt_lhs, NO_OBJECT)) {
                 // this is an error, there was a bug in choseProgram() that shouldn't have chosen this program
-                printe((execErrMsgs[0], rule->alt_lhs, rule_nr));
+                printe(execErrMsgs[0], rule->alt_lhs, rule_nr);
                 return FALSE;
             }
             // remove one instance of rule.alt_lhs from obj
@@ -640,7 +640,7 @@ bool agent_executeProgram(Agent_t *agent) {
                 //if (self.colony.env[rule.alt_rhs] <= 0):
                 if (!areObjectsInMultisetEnv(&agent->pcolony->env, rule->alt_rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
-                    printe((execErrMsgs[1], rule->alt_rhs, rule_nr));
+                    printe(execErrMsgs[1], rule->alt_rhs, rule_nr);
                     return FALSE;
                 }
                 // remove one instance of rule.alt_rhs from env only if it not 'e'
@@ -675,7 +675,7 @@ bool agent_executeProgram(Agent_t *agent) {
                 //if (self.colony.parentSwarm.global_env[rule.alt_rhs] <= 0):
                 if (!areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->alt_rhs, NO_OBJECT)) {
                     // this is an error, some other agent modified the environement
-                    printe((execErrMsgs[2], rule->alt_rhs, rule_nr));
+                    printe(execErrMsgs[2], rule->alt_rhs, rule_nr);
                     return FALSE;
                 }
 
@@ -722,17 +722,17 @@ sim_step_result_t pcolony_runSimulationStep(Pcolony_t *pcolony) {
     //for agent_name, agent in self.agents.items():
     for (uint8_t agent_nr = 0; agent_nr < pcolony->nr_agents; agent_nr++) {
         agent = &pcolony->agents[agent_nr];
-        printd(("Check AG%d", agent_nr));
+        printd("Check AG%d", agent_nr);
         // if the agent choses 1 program to execute
         //if (agent.choseProgram()) {
         if (agent_choseProgram(agent)) {
-            printi(("AG%d runnable", agent_nr));
+            printi("AG%d runnable", agent_nr);
             //runnableAgents.append(agent_name)
             runnableAgents[agent_nr] = TRUE;
             executable_agents_count++;
         }
     }
-    printi(("%d runnable ag", executable_agents_count));
+    printi("%d runnable ag", executable_agents_count);
 
     // if there are no runnable agents
     //if (len(runnableAgents) == 0):
@@ -744,14 +744,14 @@ sim_step_result_t pcolony_runSimulationStep(Pcolony_t *pcolony) {
         if (runnableAgents[agent_nr]) {
             agent = &pcolony->agents[agent_nr];
             //printi("Running Agent %s  P%d = < %s >" % (agent_name, self.agents[agent_name].chosenProgramNr, self.agents[agent_name].programs[self.agents[agent_name].chosenProgramNr].print(onlyExecutable = True)))
-            printi(("Run AG%d  P%d", agent_nr, agent->chosenProgramNr));
+            printi("Run AG%d  P%d", agent_nr, agent->chosenProgramNr);
             // if there were errors encountered during program execution
             if (!agent_executeProgram(agent)) {
-                printe(("Exec fail AG%d, STOP_SIM", agent_nr));
+                printe("Exec fail AG%d, STOP_SIM", agent_nr);
                 return SIM_STEP_RESULT_ERROR;
             }
         }
-    printi(("Sim_step_ok"));
+    printi("Sim_step_ok");
     //return SimStepResult.finished
     return SIM_STEP_RESULT_FINISHED;
 }
