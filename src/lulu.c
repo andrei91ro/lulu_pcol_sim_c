@@ -241,6 +241,18 @@ bool replaceObjInMultisetObj(multiset_obj_t *multiset, uint8_t initial_obj, uint
     return initialObjectFound;
 }
 
+bool replaceOneObjInMultisetObj(multiset_obj_t *multiset, uint8_t initial_obj, uint8_t final_obj) {
+
+    for (uint8_t i = 0; i < multiset->size; i++)
+        if (multiset->items[i] == initial_obj) {
+            multiset->items[i] = final_obj;
+            return TRUE;
+        }
+
+    //the initial object was not found
+    return FALSE;
+}
+
 bool agent_choseProgram(Agent_t *agent) {
     Rule_t *rule;
     multiset_env_t required_env, required_global_env;
@@ -314,71 +326,90 @@ bool agent_choseProgram(Agent_t *agent) {
 
             // if this is a conditional rule
             else {
-                // all types of rules require the left hand side obj to be available in the agent
-                // if not in the prioritary rule then at least in the alternative rule
-                //if ((rule.lhs not in self.obj) and (rule.alt_lhs not in self.obj))
-                if (!areObjectsInMultisetObj(&agent->obj, rule->lhs, rule->alt_lhs)) {
+
+                //we first check the first part of the conditional rule (as a normal rule)
+
+                //all types of rules require the left hand side obj to be available in the agent
+                //if (rule.lhs not in self.obj):
+                if (!areObjectsInMultisetObj(&agent->obj, rule->lhs, NO_OBJECT)) {
                     executable = FALSE;
-                    break; // stop checking
                 }
-                //if the first rule is of communication type and the right hand side object is not in the environement
-                //   or the first rule is of exteroceptive type and the right hand side object is not in the global environement
-                //if ( (rule->type == RuleType.communication and rule.rhs not in self.colony.env)
-                //  or (rule.type == RuleType.exteroceptive and rule.rhs not in self.colony.parentSwarm.global_env)
-                if ( (getFirstRuleTypeFromConditional(rule->type) == RULE_TYPE_COMMUNICATION && !areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT))
-                  || (getFirstRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE && !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) ) {
-                    // the first rule cannot be executed so we check the second rule
 
-                    // if the second rule is of communication type then the right hand side object has to be in the environement
-                    //if (rule.alt_type == RuleType.communication and rule.alt_rhs not in self.colony.env)
-                    if (getSecondRuleTypeFromConditional(rule->type) == RULE_TYPE_COMMUNICATION && !areObjectsInMultisetEnv(&agent->pcolony->env, rule->alt_rhs, NO_OBJECT)) {
-                        executable = FALSE;
-                        break;
-                    }
-
-                    // if the second rule is of exteroceptive type then the right hand side object has to be in the global Pswarm environement
-                    //if (rule.alt_type == RuleType.exteroceptive and rule.alt_rhs not in self.colony.parentSwarm.global_env)
-                    if (getSecondRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE && !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->alt_rhs, NO_OBJECT)) {
-                        executable = FALSE;
-                        break;
-                    }
-
-                    // the second rule can be executed (and the first cannot)
-                    //rule.exec_rule_nr = RuleExecOption.second // mark the second rule as executable
-                    rule->exec_rule_nr = RULE_EXEC_OPTION_SECOND; // mark the second rule as executable
-
-                    // if we reach this step, then the rule is executable
-                    //required_obj[rule.alt_lhs] += 1 // all rules need the alt_lhs to be in obj
-                    setObjectCountFromMultisetObj(&required_obj, rule->alt_lhs, COUNT_INCREMENT); //all rules need the alt_lhs to be in obj
-
-                    //if (rule.alt_type == RuleType.communication):
-                    if (getSecondRuleTypeFromConditional(rule->type) == RULE_TYPE_COMMUNICATION)
-                        //required_env[rule.alt_rhs] += 1 // alt_rhs part of the rule has to be in the Pcolony environment
-                        setObjectCountFromMultisetEnv(&required_env, rule->alt_rhs, COUNT_INCREMENT); //alt_rhs part of the rule has to be in the Pcolony environment
-
-                    //if (rule.alt_type == RuleType.exteroceptive):
-                    if (getSecondRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE)
-                        //required_global_env[rule.alt_rhs] += 1 // alt_rhs part of the rule has to be in the Pswarm global environment
-                        setObjectCountFromMultisetEnv(&required_global_env, rule->alt_rhs, COUNT_INCREMENT); //alt_rhs part of the rule has to be in the Pswarm global environment
+                //communication rules require the right hand side obj to be available in the environement
+                //if (rule.main_type == RuleType.communication and rule.rhs not in self.colony.env):
+                if (rule->type == RULE_TYPE_COMMUNICATION &&
+                        !areObjectsInMultisetEnv(&agent->pcolony->env, rule->rhs, NO_OBJECT)) {
+                    executable = FALSE;
                 }
-                // the first rule can be executed
-                else {
-                    //rule.exec_rule_nr = RuleExecOption.first // mark the first rule as executable
-                    rule->exec_rule_nr = RULE_EXEC_OPTION_FIRST; // mark the first rule as executable
 
-                    // if we reach this step, then the rule is executable
-                    //required_obj[rule.lhs] += 1 // all rules need the lhs to be in obj
+                //exteroceptive rules require the right hand side obj to be available in the global Pswarm environment
+                //if (rule.main_type == RuleType.exteroceptive and rule.rhs not in self.colony.parentSwarm.global_env):
+                if (rule->type == RULE_TYPE_EXTEROCEPTIVE &&
+                        !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->rhs, NO_OBJECT)) {
+                    executable = FALSE;
+                }
+
+                //if the first part of the conditional rule was executable
+                if (executable) {
+                    rule->exec_rule_nr = RULE_EXEC_OPTION_FIRST; //the only option available
+
+                    //if we reach this step, then the rule is executable
+                    //required_obj[rule.lhs] += 1 //all rules need the lhs to be in obj
                     setObjectCountFromMultisetObj(&required_obj, rule->lhs, COUNT_INCREMENT); //all rules need the lhs to be in obj
 
-                    //if (rule.type == RuleType.communication):
-                    if (getFirstRuleTypeFromConditional(rule->type) == RULE_TYPE_COMMUNICATION)
-                        //required_env[rule.rhs] += 1 // rhs part of the rule has to be in the Pcolony environment
+                    if (rule->type == RULE_TYPE_COMMUNICATION)
+                        //required_env[rule.rhs] += 1 //rhs part of the rule has to be in the Pcolony environment
                         setObjectCountFromMultisetEnv(&required_env, rule->rhs, COUNT_INCREMENT); //rhs part of the rule has to be in the Pcolony environment
 
-                    //if (rule.type == RuleType.exteroceptive):
-                    if (getFirstRuleTypeFromConditional(rule->type) == RULE_TYPE_EXTEROCEPTIVE)
-                        //required_global_env[rule.rhs] += 1 // rhs part of the rule has to be in the Pswarm global environment
+                    if (rule->type == RULE_TYPE_EXTEROCEPTIVE)
+                        //required_global_env[rule.rhs] += 1 //rhs part of the rule has to be in the Pswarm global environment
                         setObjectCountFromMultisetEnv(&required_global_env, rule->rhs, COUNT_INCREMENT); //rhs part of the rule has to be in the Pswarm global environment
+                }
+                // if not then check the alternative part of the conditional rule
+                else {
+                    //by clearing the multisets before checking each program, we fix potential bugs related to previously required objects
+                    clearMultisetObj(&required_obj);
+                    clearMultisetEnv(&required_env);
+                    clearMultisetEnv(&required_global_env);
+                    executable=TRUE;
+                    printd("Checking alternative of conditional for P%d", prg_nr);
+
+                    //all types of rules require the left hand side obj to be available in the agent
+                    //if (rule.alt_lhs not in self.obj):
+                    if (!areObjectsInMultisetObj(&agent->obj, rule->alt_lhs, NO_OBJECT)) {
+                        executable = FALSE;
+                        break; //stop checking
+                    }
+
+                    //communication rules require the right hand side obj to be available in the environement
+                    //if (rule.main_type == RuleType.communication and rule.alt_rhs not in self.colony.env):
+                    if (rule->type == RULE_TYPE_COMMUNICATION &&
+                            !areObjectsInMultisetEnv(&agent->pcolony->env, rule->alt_rhs, NO_OBJECT)) {
+                        executable = FALSE;
+                        break; //stop checking
+                    }
+
+                    //exteroceptive rules require the right hand side obj to be available in the global Pswarm environment
+                    //if (rule.main_type == RuleType.exteroceptive and rule.alt_rhs not in self.colony.parentSwarm.global_env):
+                    if (rule->type == RULE_TYPE_EXTEROCEPTIVE &&
+                            !areObjectsInMultisetEnv(&agent->pcolony->pswarm.global_env, rule->alt_rhs, NO_OBJECT)) {
+                        executable = FALSE;
+                        break; //stop checking
+                    }
+
+                    rule->exec_rule_nr = RULE_EXEC_OPTION_SECOND; //the only option available
+
+                    //if we reach this step, then the rule is executable
+                    //required_obj[rule.alt_lhs] += 1 //all rules need the alt_lhs to be in obj
+                    setObjectCountFromMultisetObj(&required_obj, rule->alt_lhs, COUNT_INCREMENT); //all rules need the alt_lhs to be in obj
+
+                    if (rule->type == RULE_TYPE_COMMUNICATION)
+                        //required_env[rule.alt_rhs] += 1 //alt_rhs part of the rule has to be in the Pcolony environment
+                        setObjectCountFromMultisetEnv(&required_env, rule->alt_rhs, COUNT_INCREMENT); //alt_rhs part of the rule has to be in the Pcolony environment
+
+                    if (rule->type == RULE_TYPE_EXTEROCEPTIVE)
+                        //required_global_env[rule.alt_rhs] += 1 //alt_rhs part of the rule has to be in the Pswarm global environment
+                        setObjectCountFromMultisetEnv(&required_global_env, rule->alt_rhs, COUNT_INCREMENT); //alt_rhs part of the rule has to be in the Pswarm global environment
                 }
             }
         //end for rule
