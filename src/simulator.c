@@ -55,6 +55,8 @@ void printColonyState(Pcolony_t *pcol, bool with_programs) {
 
     printf("\n \e[32m   Pcolony.env = [%s]\e[0m", printMultisetEnv(&pcol->env));
     printf("\n \e[34m   Pswarm.global_env = [%s]\e[0m", printMultisetEnv(&pcol->pswarm.global_env));
+    printf("\n \e[35m   Pswarm.in_global_env = [%s]\e[0m", printMultisetEnv(&pcol->pswarm.in_global_env));
+    printf("\n \e[36m   Pswarm.out_global_env = [%s]\e[0m", printMultisetEnv(&pcol->pswarm.out_global_env));
     for (uint8_t i = 0; i < pcol->nr_agents; i++) {
         printf("\n    %s.obj = [%s];", agentNames[i], printMultisetObj(&pcol->agents[i].obj));
         if (with_programs) {

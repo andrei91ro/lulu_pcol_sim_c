@@ -113,7 +113,9 @@ struct _Agent {
  * @brief Pswarm class that holds all the components of an Pswarm (colony of colonies)
  */
 struct _Pswarm {
-    multiset_env_t global_env; // store the objects from the global (swarm) environemnt
+    multiset_env_t global_env, // store the objects from the global (swarm) environemnt
+                   in_global_env, // store the objects from the INPUT global (swarm) environemnt
+                   out_global_env; // store the objects from the OUTPUT global (swarm) environemnt
 };
 
 /**
