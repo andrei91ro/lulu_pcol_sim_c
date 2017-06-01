@@ -74,6 +74,7 @@ typedef struct _Pcolony Pcolony_t;
 typedef struct _Agent Agent_t;
 typedef struct _Program Program_t;
 typedef struct _Rule Rule_t;
+//typedef union _Rule Rule_t;
 
 /**
  * @brief Rule struct used to represent rules that compose a program.
@@ -86,6 +87,23 @@ struct _Rule {
             alt_lhs, // Left Hand Side operand for alternative rule
             alt_rhs; // Right Hand Side operand for alternative rule
 };
+//union _Rule {
+    //struct {
+        //rule_type_t type; // defines the type of the entire rule (including conditional combinations) using rule_type_t
+        //rule_exec_option_t exec_rule_nr; // retains the rule marked for execution (none, first, second)
+        //uint8_t lhs, // Left Hand Side operand
+                //rhs; // Right Hand Side operand
+    //};
+
+    //struct {
+        //rule_type_t type1; // defines the type of the entire rule (including conditional combinations) using rule_type_t
+        //rule_exec_option_t exec_rule_nr1; // retains the rule marked for execution (none, first, second)
+        //uint8_t lhs1, // Left Hand Side operand
+                //rhs1, // Right Hand Side operand
+                //alt_lhs, // Left Hand Side operand for alternative rule
+                //alt_rhs; // Right Hand Side operand for alternative rule
+    //};
+//};
 
 /**
  * @brief Program struct used to encapsulate a list o rules.

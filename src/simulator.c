@@ -68,12 +68,12 @@ void printColonyState(Pcolony_t *pcol, bool with_programs) {
 }
 
 int main(int argc, char **argv) {
-    Pcolony_t pcol;
+    //Pcolony_t pcol;
     uint8_t step_nr = 0;
 
     srand(8312);
 
-    lulu_init(&pcol);
+    //lulu_init(&pcol);
 
     printi("Initial configuration:");
     printColonyState(&pcol, TRUE);
@@ -95,19 +95,19 @@ int main(int argc, char **argv) {
 
         if (result == SIM_STEP_RESULT_NO_MORE_EXECUTABLES) {
             printi("Simulation finished sucesfully");
-            lulu_destroy(&pcol);
+            //lulu_destroy(&pcol);
             return 0;
         }
         else if (result == SIM_STEP_RESULT_ERROR) {
             printe("Error encountered");
-            lulu_destroy(&pcol);
+            //lulu_destroy(&pcol);
             return 1;
         }
 
         step_nr++;
     }
 
-    lulu_destroy(&pcol);
+    //lulu_destroy(&pcol);
 
     return 0;
 }
