@@ -9,6 +9,7 @@
 #include "lulu.h"
 #include "debug_print.h"
 #include <stdlib.h> //for rand() on PC and malloc on PC and AVR
+#include <string.h>
 
 //if building Pcolony simulator for AVR (Kilobot)
 #ifdef KILOBOT
@@ -260,7 +261,8 @@ bool replaceOneObjInMultisetObj(multiset_obj_t *multiset, uint8_t initial_obj, u
 }
 
 bool agent_choseProgram(Agent_t *agent) {
-    Rule_t *rule;
+    Program_t *program = 0;
+    Rule_t *rule = &( (Rule_t) {RULE_TYPE_NONE, NO_OBJECT, NO_OBJECT, NO_OBJECT, NO_OBJECT});
     multiset_env_t required_env, required_global_env, required_in_global_env, required_out_global_env;
     multiset_obj_t required_obj;
     uint8_t chosen_prg_count = 0, last_chosen_prg_nr = 0;
@@ -277,6 +279,7 @@ bool agent_choseProgram(Agent_t *agent) {
     initMultisetEnv(&required_out_global_env, agent->pcolony->nr_A);
 
     for (uint8_t prg_nr = 0; prg_nr < agent->nr_programs; prg_nr++) {
+        program = &agent->programs[prg_nr];
         bool executable = TRUE;
         //by clearing the multisets before checking each program, we fix the bug related to required_env failed for more than one program
         clearMultisetObj(&required_obj);
@@ -291,7 +294,12 @@ bool agent_choseProgram(Agent_t *agent) {
             setObjectCountFromMultisetObj(&required_obj, OBJECT_ID_E, COUNT_INCREMENT);
 
         for (uint8_t rule_nr = 0; rule_nr < agent->programs[prg_nr].nr_rules; rule_nr++) {
-            rule = &agent->programs[prg_nr].rules[rule_nr];
+#ifdef KILOBOT
+            memcpy_P((void *)rule, (void *)&agent->programs[prg_nr].rules[rule_nr], sizeof(Rule_t));
+#else
+            memcpy((void *)rule, (void *)&agent->programs[prg_nr].rules[rule_nr], sizeof(Rule_t));
+            //rule = &agent->programs[prg_nr].rules[rule_nr];
+#endif
 
             //if rule is a simple, non-conditional rule
             if (rule->type < RULE_TYPE_CONDITIONAL_EVOLUTION_EVOLUTION) {
@@ -335,7 +343,8 @@ bool agent_choseProgram(Agent_t *agent) {
                     break; //stop checking
                 }
 
-                rule->exec_rule_nr = RULE_EXEC_OPTION_FIRST; //the only option available
+                //rule->exec_rule_nr = RULE_EXEC_OPTION_FIRST; //the only option available
+                program->exec_rule_numbers[rule_nr] = RULE_EXEC_OPTION_FIRST; //the only option available
 
                 //if we reach this step, then the rule is executable
                 //required_obj[rule.lhs] += 1 //all rules need the lhs to be in obj
@@ -399,7 +408,8 @@ bool agent_choseProgram(Agent_t *agent) {
 
                 //if the first part of the conditional rule was executable
                 if (executable) {
-                    rule->exec_rule_nr = RULE_EXEC_OPTION_FIRST; //the only option available
+                    //rule->exec_rule_nr = RULE_EXEC_OPTION_FIRST; //the only option available
+                    program->exec_rule_numbers[rule_nr] = RULE_EXEC_OPTION_FIRST; //the only option available
 
                     //if we reach this step, then the rule is executable
                     //required_obj[rule.lhs] += 1 //all rules need the lhs to be in obj
@@ -472,7 +482,8 @@ bool agent_choseProgram(Agent_t *agent) {
                         break; //stop checking
                     }
 
-                    rule->exec_rule_nr = RULE_EXEC_OPTION_SECOND; //the only option available
+                    //rule->exec_rule_nr = RULE_EXEC_OPTION_SECOND; //the only option available
+                    program->exec_rule_numbers[rule_nr] = RULE_EXEC_OPTION_SECOND; //the only option available
 
                     //if we reach this step, then the rule is executable
                     //required_obj[rule.alt_lhs] += 1 //all rules need the alt_lhs to be in obj
@@ -647,18 +658,24 @@ bool agent_choseProgram(Agent_t *agent) {
 }
 
 bool agent_executeProgram(Agent_t *agent) {
-    Program_t *program;
-    Rule_t *rule;
+    Program_t *program = 0;
+    Rule_t *rule = &( (Rule_t) {RULE_TYPE_NONE, NO_OBJECT, NO_OBJECT, NO_OBJECT, NO_OBJECT});
 
     if (agent->chosenProgramNr < 0)
         return FALSE;
 
     program = &agent->programs[agent->chosenProgramNr];
     for (uint8_t rule_nr = 0; rule_nr < program->nr_rules; rule_nr++) {
-        rule = &program->rules[rule_nr];
+#ifdef KILOBOT
+        memcpy_P((void *)rule, (void *)&program->rules[rule_nr], sizeof(Rule_t));
+#else
+        memcpy((void *)rule, (void *)&program->rules[rule_nr], sizeof(Rule_t));
+        //rule = &program->rules[rule_nr];
+#endif
         // if this is a non-conditional or the first rule of a conditional rule was chosen
         //if (rule.exec_rule_nr == RuleExecOption.first):
-        if (rule->exec_rule_nr == RULE_EXEC_OPTION_FIRST) {
+        //if (rule->exec_rule_nr == RULE_EXEC_OPTION_FIRST) {
+        if (program->exec_rule_numbers[rule_nr] == RULE_EXEC_OPTION_FIRST) {
 
             // if the rule.lhs object is not in obj any more
             //if (self.obj[rule.lhs] <= 0):
@@ -828,7 +845,8 @@ bool agent_executeProgram(Agent_t *agent) {
         }
         // if this is a conditional rule and the second rule was chosen for execution
         //elif (rule.exec_rule_nr == RuleExecOption.second):
-        else if (rule->exec_rule_nr == RULE_EXEC_OPTION_SECOND) {
+        //else if (rule->exec_rule_nr == RULE_EXEC_OPTION_SECOND) {
+        else if (program->exec_rule_numbers[rule_nr] == RULE_EXEC_OPTION_SECOND) {
 
             // if the rule.alt_lhs object is not in obj any more
             //if (self.obj[rule.alt_lhs] <= 0):
@@ -1100,23 +1118,24 @@ void initPcolony(Pcolony_t *pcol, uint8_t nr_A, uint8_t nr_agents, uint8_t n) {
 }
 
 void destroyPcolony(Pcolony_t *pcol) {
-
-    //free agents
-    if (pcol->nr_agents > 0) {
-        for (uint8_t i = 0; i < pcol->nr_agents; i++)
-            destroyAgent(&pcol->agents[i]);
-        //free agent list
-        free(pcol->agents);
-        pcol->nr_agents = 0;
-    }
-
-    destroyMultisetEnv(&pcol->env);
-    destroyMultisetEnv(&pcol->pswarm.global_env);
-    destroyMultisetEnv(&pcol->pswarm.in_global_env);
-    destroyMultisetEnv(&pcol->pswarm.out_global_env);
-
-    pcol->n = 0;
 }
+
+    ////free agents
+    //if (pcol->nr_agents > 0) {
+        //for (uint8_t i = 0; i < pcol->nr_agents; i++)
+            //destroyAgent(&pcol->agents[i]);
+        ////free agent list
+        //free(pcol->agents);
+        //pcol->nr_agents = 0;
+    //}
+
+    //destroyMultisetEnv(&pcol->env);
+    //destroyMultisetEnv(&pcol->pswarm.global_env);
+    //destroyMultisetEnv(&pcol->pswarm.in_global_env);
+    //destroyMultisetEnv(&pcol->pswarm.out_global_env);
+
+    //pcol->n = 0;
+//}
 
 void initAgent(Agent_t *agent, Pcolony_t *pcol, uint8_t nr_programs) {
     agent->nr_programs = nr_programs;
@@ -1130,57 +1149,30 @@ void initAgent(Agent_t *agent, Pcolony_t *pcol, uint8_t nr_programs) {
     initMultisetObj(&agent->obj, pcol->n);
 }
 
-void destroyAgent(Agent_t *agent) {
-    destroyMultisetObj(&agent->obj);
+//void destroyAgent(Agent_t *agent) {
+    //destroyMultisetObj(&agent->obj);
 
-    //destroy programs
-    if (agent->nr_programs > 0) {
-        for (uint8_t i = 0; i < agent->nr_programs; i++)
-            destroyProgram(&agent->programs[i]);
-        //free the programs list
-        free(agent->programs);
-        agent->nr_programs = 0;
-    }
+    ////destroy programs
+    //if (agent->nr_programs > 0) {
+        //for (uint8_t i = 0; i < agent->nr_programs; i++)
+            //destroyProgram(&agent->programs[i]);
+        ////free the programs list
+        //free(agent->programs);
+        //agent->nr_programs = 0;
+    //}
 
-    agent->pcolony = 0;
-    agent->chosenProgramNr = -1;
-}
+    //agent->pcolony = 0;
+    //agent->chosenProgramNr = -1;
+//}
 
 void initProgram(Program_t *program, uint8_t nr_rules) {
     program->nr_rules = nr_rules;
     program->rules = (Rule_t *) malloc(sizeof(Rule_t) * program->nr_rules);
 }
 
-void copyProgram(Program_t *destination, Program_t *source) {
-    initProgram(destination, source->nr_rules);
-    for (uint8_t rule_nr = 0; rule_nr < source->nr_rules; rule_nr++)
-        initRule(&destination->rules[rule_nr],
-                source->rules[rule_nr].type,
-                source->rules[rule_nr].lhs,
-                source->rules[rule_nr].rhs,
-                source->rules[rule_nr].alt_lhs,
-                source->rules[rule_nr].alt_rhs);
-}
-
-void destroyProgram(Program_t *program) {
-    if (program->nr_rules > 0) {
-        free(program->rules);
-        program->nr_rules = 0;
-    }
-}
-
-void initRule(Rule_t *rule, rule_type_t type, uint8_t lhs, uint8_t rhs, uint8_t alt_lhs, uint8_t alt_rhs) {
-    rule->type = type;
-    rule->lhs = lhs;
-    rule->rhs = rhs;
-
-    if (rule->type >= RULE_TYPE_CONDITIONAL_EVOLUTION_EVOLUTION) {
-        rule->alt_lhs = alt_lhs;
-        rule->alt_rhs = alt_rhs;
-    }
-    // alt_ is not needed for non-conditional rules
-    else {
-        rule->alt_lhs = NO_OBJECT;
-        rule->alt_rhs = NO_OBJECT;
-    }
-}
+//void destroyProgram(Program_t *program) {
+    //if (program->nr_rules > 0) {
+        //free(program->rules);
+        //program->nr_rules = 0;
+    //}
+//}

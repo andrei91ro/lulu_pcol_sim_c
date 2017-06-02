@@ -26,6 +26,10 @@
 
 typedef uint8_t bool;
 
+#ifdef KILOBOT
+    #include <avr/pgmspace.h>
+#endif
+
 /**
  * @brief Enumeration of rule selection options (used mainly for marking the executable rule from a conditional rule)
  */
@@ -73,16 +77,25 @@ typedef struct _Pswarm Pswarm_t;
 typedef struct _Pcolony Pcolony_t;
 typedef struct _Agent Agent_t;
 typedef struct _Program Program_t;
-typedef struct _Rule Rule_t;
+#ifdef KILOBOT
+    typedef struct PROGMEM _Rule Rule_t ;
+#else
+    typedef struct _Rule Rule_t ;
+#endif
 //typedef union _Rule Rule_t;
 
 /**
  * @brief Rule struct used to represent rules that compose a program.
+ * All member values are constants and are placed in Program memory on
+ * microcontrollers (Kilobot)
  */
-struct _Rule {
-    rule_type_t type; // defines the type of the entire rule (including conditional combinations) using rule_type_t
-    rule_exec_option_t exec_rule_nr; // retains the rule marked for execution (none, first, second)
-    uint8_t lhs, // Left Hand Side operand
+#ifdef KILOBOT
+    struct PROGMEM _Rule {
+#else
+    struct _Rule {
+#endif
+    const rule_type_t type; // defines the type of the entire rule (including conditional combinations) using rule_type_t
+    const uint8_t lhs, // Left Hand Side operand
             rhs, // Right Hand Side operand
             alt_lhs, // Left Hand Side operand for alternative rule
             alt_rhs; // Right Hand Side operand for alternative rule
@@ -110,7 +123,8 @@ struct _Rule {
  */
 struct _Program {
     uint8_t nr_rules;
-    Rule_t *rules;
+    rule_exec_option_t *exec_rule_numbers; // retains the part of a rule marked for execution (none, first, second), for each rule
+    const Rule_t *rules;
 };
 
 /**
