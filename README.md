@@ -46,9 +46,9 @@ For micro-controller applications, the buildsystem will create 2 versions of the
 
 
 # Authors
-Andrei George Florea, Cătălin Buiu,
+Andrei George Florea, [Cătălin Buiu](http://catalin.buiu.net)
 
-Department of Automatic Control And Systems Engineering,
+[Department of Automatic Control And Systems Engineering](http://acse.pub.ro),
 
 Politehnica University of Bucharest
 
