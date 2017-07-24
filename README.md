@@ -9,14 +9,14 @@ A standalone P/XP colony simulation application is included in this package.
 * Compilers:
   * GCC - for simulations on a computer
   * AVR-GCC - for building a library that can be included in an AVR microcontroller application
-* C Libraries:
-  * [Kilolib](https://github.com/acornejo/kilolib) - ONLY for AVR
-* [Lulu P Colony simulator (Python)](https://github.com/andrei91ro/lulu_pcol_sim) - Is requiered 
+* [Kilolib](https://github.com/acornejo/kilolib) - ONLY for AVR
 * [Lulu\_C](https://github.com/andrei91ro/lulu_c) - Python 3 conversion script used to translate Lulu text input files to C source code
 * [Make](https://www.gnu.org/software/make/) - for an automated build process
 
+The build process was tested on an up-to-date Linux distribution (ArchLinux). The build process should work on most unixes and on Windows using packages such as MinGW.
+
 # Usage
-After installing all components and adjunsting the corresponding paths, simply call `make` in the project folder
+After installing all components and adjunsting the corresponding paths (using Makefile parameters), simply call `make` in the project folder
 
 If no errors are reported during compilation, there should be two `build` folders:
 
