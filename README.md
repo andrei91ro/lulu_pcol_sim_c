@@ -16,9 +16,13 @@ A standalone P/XP colony simulation application is included in this package.
 The build process was tested on an up-to-date Linux distribution (ArchLinux). The build process should work on most unixes and on Windows using packages such as MinGW.
 
 # Usage
-After installing all components and adjunsting the corresponding paths (using Makefile parameters), simply call `make` in the project folder
+After installing all components and adjusting the corresponding paths (using Makefile parameters), simply execute the following list of commands, in the project folder:
 
-If no errors are reported during compilation, there should be two `build` folders:
+`mkdir build build_hex`
+
+`make`
+
+If no errors are reported during compilation, the build folders should contain, among others, the following files:
 
 * build
   * lulu.a
@@ -44,6 +48,9 @@ This parameter controls the verbosity of the `Lulu` library and the `simulator` 
 
 For micro-controller applications, the buildsystem will create 2 versions of the library, with/without message printing in order to simplify the build process for the host application.
 
+# API Documentation
+
+More detailed information can be found on the project [documentation page](https://andrei91ro.github.io/lulu_pcol_sim_c).
 
 # Authors
 Andrei George Florea, [Cătălin Buiu](http://catalin.buiu.net)

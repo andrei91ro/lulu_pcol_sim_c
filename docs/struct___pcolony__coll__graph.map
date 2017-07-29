@@ -1,0 +1,9 @@
+<map id="_Pcolony" name="_Pcolony">
+<area shape="rect" id="node5" href="$struct___agent.html" title="Agent struct used to represent a P colony agent. " alt="" coords="163,392,230,419"/>
+<area shape="rect" id="node2" href="$struct___pswarm.html" title="Pswarm class that holds all the components of an Pswarm (colony of colonies) " alt="" coords="320,213,401,240"/>
+<area shape="rect" id="node3" href="$struct__multiset__env.html" title="Structure used to define a multiset that can hold simbolic objects and the number of times they appea..." alt="" coords="230,95,345,121"/>
+<area shape="rect" id="node4" href="$struct__multiset__env__item.html" title="Structure used to retain a symbolic object present in multiset containers such as Pcolony..." alt="" coords="212,5,363,32"/>
+<area shape="rect" id="node6" href="$struct___program.html" title="Program struct used to encapsulate a list o rules. " alt="" coords="5,303,89,329"/>
+<area shape="rect" id="node7" href="$struct___rule.html" title="Rule struct used to represent rules that compose a program. " alt="" coords="19,213,76,240"/>
+<area shape="rect" id="node8" href="$struct__multiset__obj.html" title="Multiset structure used for limited storage components such as the objects from an Agent (that are li..." alt="" coords="113,303,224,329"/>
+</map>
