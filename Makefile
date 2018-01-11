@@ -27,16 +27,16 @@ KILOLIB_LIB = $(KILOLIB_HEADERS)/build/kilolib.a
 ifeq ($(DEBUG),2)
 	# release flags
 	CFLAGS = -Wall -g -O2 -c -DPCOL_SIM -std=c99
-	BFLAGS = -Wall -g -O2 -DPCOL_SIM
+	BFLAGS = -Wall -g -O2 -DPCOL_SIM -std=c99
 else
 	#debug & testing flags
 	CFLAGS = -Wall -g -O0 -fbuiltin -c -DPCOL_SIM -DDEBUG_PRINT=$(DEBUG) -std=c99
-	BFLAGS = -Wall -g -O0 -fbuiltin -DPCOL_SIM -DDEBUG_PRINT=$(DEBUG)
+	BFLAGS = -Wall -g -O0 -fbuiltin -DPCOL_SIM -DDEBUG_PRINT=$(DEBUG) -std=c99
 endif
 
 # AVR flags are not included in the above conditional because we simulateneously build both debug and release versions of the AVR library
-CFLAGS_AVR = -c -mmcu=atmega328p -Wall -gdwarf-2 $(AVR_OPTIM) -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -DF_CPU=8000000 -I$(KILOLIB_HEADERS) -DKILOBOT
-BFLAGS_AVR = -mmcu=atmega328p -Wall -gdwarf-2 $(AVR_OPTIM) -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -DF_CPU=8000000 -I$(KILOLIB_HEADERS) -DKILOBOT
+CFLAGS_AVR = -c -mmcu=atmega328p -Wall -gdwarf-2 $(AVR_OPTIM) -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -DF_CPU=8000000 -I$(KILOLIB_HEADERS) -DKILOBOT -std=c99
+BFLAGS_AVR = -mmcu=atmega328p -Wall -gdwarf-2 $(AVR_OPTIM) -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -DF_CPU=8000000 -I$(KILOLIB_HEADERS) -DKILOBOT -std=c99
 
 CFLAGS_DEBUG_AVR = $(CFLAGS_AVR) -DDEBUG_PRINT=0 -Wl,-u,vfprintf -lprintf_min
 BFLAGS_DEBUG_AVR = $(BFLAGS_AVR) -DDEBUG_PRINT=0 -Wl,-u,vfprintf -lprintf_min
@@ -82,7 +82,7 @@ build/wild_expand.o: src/wild_expand.h src/wild_expand.c
 
 # automatic generation of a C instance of a parsed P colony
 src/instance.h src/instance.c:
-	python $(LULU_C) $(LULU_INSTANCE_FILE) src/instance
+	$(LULU_C) $(LULU_INSTANCE_FILE) src/instance
 
 # --------------------------------------------------------------------------------------------------------------------
 # The following rules build for the kilobot

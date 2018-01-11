@@ -1,0 +1,26 @@
+pswarm = {
+    global_env = {S_%id, B_*};
+    C = {pi};
+        pi = {
+            A = {D, S, B, l_m, B_*, B_%id, S_%id, ID_%id, ID_*, X_*};
+            e = e;
+            f = f;
+            n = 2;
+            env = {B_%id, l_m, X_*};
+            B = {command, motion, xtest};
+                command = ({S_%id, e};
+                        < S_%id->B_%id, e->e >
+                );
+
+                motion = ({e, e};
+                        < e->ID_%id, e<->B_%id >,
+                        < ID_%id->e, B_%id->e >
+                );
+
+                xtest = ({e, e};
+                        < e->f, e<->X_* >,
+                        < e->f, f->e>,
+                        < ID_*->e, X_*<=>e >
+                );
+        };
+}
